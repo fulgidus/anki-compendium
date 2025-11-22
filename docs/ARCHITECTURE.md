@@ -133,18 +133,19 @@ Anki Compendium is a Progressive Web Application that transforms academic docume
   - Card generation and .apkg creation
   - Notification dispatch
 
-#### RAG Pipeline
-- **Vector Database**: pgvector (PostgreSQL extension) or ChromaDB self-hosted
-- **Embeddings**: Google Gemini Embeddings API
+#### RAG Pipeline (LangChain Hybrid Approach)
+- **Framework**: LangChain for orchestration and vector operations
+- **Vector Database**: pgvector (PostgreSQL extension) via LangChain
+- **Embeddings**: Google Gemini Embeddings API via LangChain
 - **Pipeline Stages**:
-  1. **Extraction/Recursion**: Extract text from PDF pages
-  2. **Chunking**: Split text (500 tokens, 20% overlap, configurable)
-  3. **Topic Extraction**: Identify main topics and subtopics
-  4. **Topic Refinement**: Improve topic hierarchy
-  5. **Tag Generation**: Generate relevant tags for cards
-  6. **Question Generation**: Generate Q&A pairs
-  7. **Question Answering**: Validate and refine answers
-  8. **Card Generation**: Create Anki Basic cards (front/back)
+  1. **Extraction/Recursion**: LangChain PyMuPDFLoader for PDF text extraction
+  2. **Chunking**: LangChain RecursiveCharacterTextSplitter (500 tokens, 20% overlap, configurable)
+  3. **Topic Extraction**: LangChain chains + Gemini (identify main topics and subtopics)
+  4. **Topic Refinement**: LangChain chains + Gemini (improve topic hierarchy)
+  5. **Tag Generation**: LangChain chains + Gemini (generate relevant tags)
+  6. **Question Generation**: LangChain prompt templates + Gemini (generate Q&A pairs)
+  7. **Question Answering**: LangChain chains + Gemini (validate and refine answers)
+  8. **Card Generation**: Custom logic with genanki (create Anki Basic cards front/back)
 
 #### Gemini Integration
 - **Models**:
@@ -161,6 +162,116 @@ Anki Compendium is a Progressive Web Application that transforms academic docume
   - Answers: 2-10 sentences
   - Atomic facts (minimum information principle)
   - User-configurable density via prompt settings
+
+---
+
+## 2.3 LangChain Hybrid Approach
+
+### Philosophy
+We use **LangChain selectively** to accelerate development where it provides significant value, while maintaining custom control for Anki-specific logic.
+
+### LangChain Components Used
+
+#### ✅ Stage 1-2: Document Loading & Chunking
+```python
+from langchain.document_loaders import PyMuPDFLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+# PDF Loading (replaces custom PyMuPDF code)
+loader = PyMuPDFLoader(pdf_path)
+pages = loader.load_and_split()
+
+# Intelligent Chunking (replaces custom tokenization)
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,  # Configurable via admin settings
+    chunk_overlap=100,  # 20% overlap
+    length_function=len
+)
+chunks = splitter.split_documents(pages)
+```
+**Benefit**: Saves 1-2 weeks, battle-tested extraction logic
+
+#### ✅ Vector Store & Embeddings
+```python
+from langchain.vectorstores import PGVector
+from langchain.embeddings import GoogleGenerativeAIEmbeddings
+
+# Automated vector store setup with pgvector
+embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+vectorstore = PGVector.from_documents(
+    documents=chunks,
+    embedding=embeddings,
+    connection_string=DATABASE_URL,
+    collection_name="pdf_chunks"
+)
+
+# Semantic search
+relevant_chunks = vectorstore.similarity_search(query, k=5)
+```
+**Benefit**: Saves 1 week, handles embeddings and retrieval automatically
+
+#### ✅ Stage 3-7: Prompt Templates & Chains
+```python
+from langchain.prompts import ChatPromptTemplate
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.chains import LLMChain
+
+# Topic Extraction Chain
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.7)
+
+topic_prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are an expert educator creating study materials."),
+    ("user", "Extract main topics and subtopics from:\n\n{text}")
+])
+
+topic_chain = topic_prompt | llm
+topics = topic_chain.invoke({"text": chunk_text})
+```
+**Benefit**: Saves 1-2 weeks, clean prompt management and retry logic
+
+#### ❌ Stage 8: Custom Card Generation
+```python
+import genanki
+
+# LangChain does NOT handle Anki-specific formatting
+# We maintain custom logic for precise control over:
+# - Front/Back card structure
+# - Tags and metadata
+# - Deck hierarchy
+# - .apkg file generation
+
+deck = genanki.Deck(deck_id, deck_name)
+note = genanki.Note(
+    model=basic_model,
+    fields=[question, answer],
+    tags=tags
+)
+deck.add_note(note)
+genanki.Package(deck).write_to_file(output_path)
+```
+**Benefit**: Full control over Anki format, no abstraction overhead
+
+### LangChain Dependencies
+```python
+# requirements.txt additions
+langchain>=0.1.0
+langchain-google-genai>=0.0.6
+langchain-postgres>=0.0.3  # For PGVector integration
+```
+
+### Performance Considerations
+- **Abstraction Overhead**: Minimal (<5% performance impact)
+- **Dependency Weight**: ~50 additional packages (acceptable for time savings)
+- **Debugging**: LangChain provides good logging and tracing tools
+
+### Migration Path
+If needed, LangChain can be replaced component-by-component:
+1. Document loaders → Direct PyMuPDF calls
+2. Text splitters → Custom tokenization
+3. Vector store → Direct pgvector SQL queries
+4. Chains → Direct Gemini API calls
+
+**Estimated migration effort**: 2-3 weeks (but unlikely to be needed)
 
 ---
 
@@ -221,9 +332,13 @@ User clicks "Open in Anki" → Frontend calls AnkiConnect API (localhost:8765)
 - **ORM**: SQLAlchemy
 - **Migration**: Alembic
 - **Validation**: Pydantic
-- **PDF Extraction**: PyMuPDF (fitz) or pdfplumber
-- **Anki Export**: genanki
-- **AI**: Google Gemini API (via official SDK)
+- **RAG Framework**: LangChain (hybrid approach)
+  - Document loaders and text splitters
+  - Vector store integration (pgvector)
+  - Prompt templates and chains
+- **PDF Extraction**: LangChain PyMuPDFLoader
+- **Anki Export**: genanki (custom logic)
+- **AI**: Google Gemini API via LangChain + official SDK
 
 ### Infrastructure
 - **Container Runtime**: Docker

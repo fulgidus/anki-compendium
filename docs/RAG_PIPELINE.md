@@ -2,7 +2,12 @@
 
 ## Overview
 
-The RAG (Retrieval-Augmented Generation) pipeline transforms PDF documents into high-quality Anki flashcards through an 8-stage process powered by Google Gemini AI.
+The RAG (Retrieval-Augmented Generation) pipeline transforms PDF documents into high-quality Anki flashcards through an 8-stage process powered by Google Gemini AI and **LangChain** (hybrid approach for accelerated development).
+
+### LangChain Integration Strategy
+- **Stages 1-2**: LangChain document loaders and text splitters
+- **Stages 3-7**: LangChain prompt templates and chains with Gemini
+- **Stage 8**: Custom logic with genanki (Anki-specific formatting)
 
 ---
 
@@ -17,109 +22,123 @@ PDF Input (Selected Pages)
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 1: Extraction & Recursion                                  │
+│ Stage 1: Extraction & Recursion (🔗 LangChain)                  │
 │ ─────────────────────────────────────────────────────────────── │
-│ • Extract text from PDF pages (PyMuPDF/pdfplumber)              │
-│ • Handle multi-column layouts                                    │
+│ • LangChain PyMuPDFLoader for PDF text extraction               │
+│ • Handle multi-column layouts automatically                      │
 │ • Preserve structural hierarchy (headings, sections)             │
 │ • Extract images and tables (optional, V2)                       │
+│ • Code: loader = PyMuPDFLoader(pdf_path); pages = loader.load() │
 │ ─────────────────────────────────────────────────────────────── │
-│ Output: Raw text with structure metadata                         │
+│ Output: List of Document objects with text + metadata            │
 └──────────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 2: Chunking                                                │
+│ Stage 2: Chunking (🔗 LangChain)                                │
 │ ─────────────────────────────────────────────────────────────── │
-│ • Split text into semantic chunks                                │
-│ • Chunk size: 500 tokens (configurable via admin settings)      │
-│ • Overlap: 20% (configurable)                                    │
-│ • Preserve sentence boundaries                                   │
-│ • Token counting: tiktoken (cl100k_base)                         │
+│ • LangChain RecursiveCharacterTextSplitter                       │
+│ • Chunk size: 500 characters (configurable via admin settings)  │
+│ • Overlap: 100 characters (20%, configurable)                    │
+│ • Preserve sentence boundaries automatically                     │
+│ • Code: splitter.split_documents(pages)                          │
 │ ─────────────────────────────────────────────────────────────── │
-│ Output: List of text chunks with metadata                        │
+│ Output: List of Document chunks with metadata                    │
 └──────────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 3: Topic & Subtopic Extraction                             │
+│ Stage 3: Topic & Subtopic Extraction (🔗 LangChain Chain)       │
 │ ─────────────────────────────────────────────────────────────── │
+│ • LangChain ChatPromptTemplate + Gemini 1.5 Flash                │
 │ • Analyze chunks to identify main topics                         │
 │ • Extract subtopics and hierarchical structure                   │
-│ • Use Gemini 1.5 Flash for extraction                            │
-│ • Prompt: "Extract main topics and subtopics from this text"    │
+│ • Code: topic_chain = prompt | llm | output_parser              │
+│ • Automatic retry logic and error handling                       │
 │ ─────────────────────────────────────────────────────────────── │
-│ Output: Topic hierarchy (JSON)                                   │
+│ Output: Topic hierarchy (JSON parsed automatically)              │
 └──────────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 4: Topic Refinement                                        │
+│ Stage 4: Topic Refinement (🔗 LangChain Chain)                  │
 │ ─────────────────────────────────────────────────────────────── │
+│ • LangChain chain with Gemini 1.5 Flash                          │
 │ • Consolidate duplicate or overlapping topics                    │
 │ • Improve topic naming and hierarchy                             │
-│ • Use Gemini 1.5 Flash for refinement                            │
-│ • Prompt: "Refine and consolidate this topic structure"         │
+│ • Code: refinement_chain.invoke({"topics": topics})             │
 │ ─────────────────────────────────────────────────────────────── │
 │ Output: Refined topic hierarchy                                  │
 └──────────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 5: Tag Generation                                          │
+│ Stage 5: Tag Generation (🔗 LangChain Chain)                    │
 │ ─────────────────────────────────────────────────────────────── │
+│ • LangChain chain with Gemini 1.5 Flash                          │
 │ • Generate relevant tags for each topic                          │
 │ • Include domain-specific keywords                               │
-│ • Use Gemini 1.5 Flash for tag generation                        │
-│ • Prompt: "Generate relevant tags for these topics"             │
+│ • Code: tag_chain.invoke({"topics": refined_topics})            │
 │ ─────────────────────────────────────────────────────────────── │
-│ Output: Tags per topic (array)                                   │
+│ Output: Tags per topic (array, JSON parsed)                      │
 └──────────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 6: Question Generation                                     │
+│ Stage 6: Question Generation (🔗 LangChain Chain)               │
 │ ─────────────────────────────────────────────────────────────── │
+│ • LangChain ChatPromptTemplate with Gemini 1.5 Flash             │
 │ • Generate questions based on topics and chunks                  │
-│ • Apply spaced repetition principles                             │
+│ • Apply spaced repetition principles (via prompt)                │
 │ • Focus on active recall (not recognition)                       │
-│ • Use Gemini 1.5 Flash for Q generation                          │
-│ • User-configurable density (cards per page)                     │
-│ • Custom instructions support                                    │
-│ • Language specification (via user settings)                     │
-│ • Prompt template with density/language/custom instructions      │
+│ • User-configurable density, language, custom instructions       │
+│ • Code: question_chain.invoke({context, topics, settings})      │
 │ ─────────────────────────────────────────────────────────────── │
-│ Output: List of questions (front card content)                   │
+│ Output: List of questions (JSON structured)                      │
 └──────────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 7: Question Answering                                      │
+│ Stage 7: Question Answering (🔗 LangChain Chain)                │
 │ ─────────────────────────────────────────────────────────────── │
+│ • LangChain chain with Gemini 1.5 Flash                          │
 │ • Generate answers for each question                             │
-│ • Validate answers against source text                           │
+│ • Validate answers against source text (via retrieval)           │
 │ • Ensure answer quality: 2-10 sentences (configurable)          │
-│ • Use Gemini 1.5 Flash for answer generation                     │
-│ • Prompt: "Answer this question based on the context"           │
+│ • Code: answer_chain.invoke({question, context})                │
 │ ─────────────────────────────────────────────────────────────── │
-│ Output: Q&A pairs (question + answer)                            │
+│ Output: Q&A pairs (question + answer, structured)                │
 └──────────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 8: Card Generation                                         │
+│ Stage 8: Card Generation (⚙️ Custom Logic)                      │
 │ ─────────────────────────────────────────────────────────────── │
+│ • Custom Python logic (NOT LangChain)                            │
 │ • Format Q&A pairs into Anki Basic cards                         │
-│ • Apply final refinement (optional, Gemini 1.5 Pro)             │
+│ • Apply final refinement (optional, Gemini 1.5 Pro via chain)   │
 │ • Add metadata (tags, topics, source)                            │
-│ • Generate .apkg file using genanki                              │
+│ • Generate .apkg file using genanki library                      │
 │ • Validate card quality (minimum info principle)                 │
+│ • Code: deck.add_note(note); package.write_to_file(path)        │
 │ ─────────────────────────────────────────────────────────────── │
-│ Output: .apkg file (Anki deck)                                   │
+│ Output: .apkg file (Anki deck) - Full custom control            │
 └──────────────────────────────────────────────────────────────────┘
     │
     ▼
 Upload to MinIO → Update job status → Notify user
+
+---
+
+## LangChain Implementation Benefits
+
+### Time Savings Breakdown
+- **Stage 1 (Extraction)**: -70% dev time (LangChain loader vs custom PyMuPDF)
+- **Stage 2 (Chunking)**: -80% dev time (battle-tested splitter)
+- **Stages 3-7 (Chains)**: -40% dev time (prompt templates, retry logic, error handling)
+- **Stage 8 (Cards)**: 0% (custom logic required)
+
+**Total estimated time savings: 2-3 weeks** on 8-10 week MVP timeline
 ```
 
 ---
@@ -141,29 +160,41 @@ Upload to MinIO → Update job status → Notify user
 
 **Admin Configuration**: All model selections are configurable via the `settings` table.
 
-### API Usage Pattern
+### API Usage Pattern (LangChain)
 
 ```python
-import google.generativeai as genai
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain.prompts import ChatPromptTemplate
+from langchain.output_parsers import JsonOutputParser
 
-# Configure API key
-genai.configure(api_key=settings.GEMINI_API_KEY)
-
-# Get model from admin settings
-model_name = get_setting('gemini_model_qa_generation')  # e.g., "gemini-1.5-flash"
-model = genai.GenerativeModel(model_name)
-
-# Generate content
-response = model.generate_content(
-    prompt,
-    generation_config={
-        "temperature": 0.7,
-        "top_p": 0.95,
-        "top_k": 40,
-        "max_output_tokens": 2048,
-    }
+# Initialize Gemini via LangChain
+llm = ChatGoogleGenerativeAI(
+    model="gemini-1.5-flash",
+    google_api_key=settings.GEMINI_API_KEY,
+    temperature=0.7,
+    max_output_tokens=2048
 )
+
+# Create prompt template
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are an expert educator."),
+    ("user", "{input}")
+])
+
+# Create chain with output parsing
+output_parser = JsonOutputParser()
+chain = prompt | llm | output_parser
+
+# Invoke chain (automatic retry on rate limit, error handling)
+result = chain.invoke({"input": "Extract topics from this text..."})
 ```
+
+**LangChain Benefits**:
+- Automatic retry logic for rate limits
+- Built-in error handling
+- Structured output parsing
+- Prompt template management
+- Logging and observability
 
 ### Rate Limiting & Cost Control
 
@@ -207,42 +238,55 @@ CREATE INDEX idx_chunk_embeddings_embedding ON chunk_embeddings
     USING ivfflat (embedding vector_cosine_ops);
 ```
 
-### Embedding Generation
+### Embedding Generation (LangChain)
 
 ```python
-import google.generativeai as genai
+from langchain.embeddings import GoogleGenerativeAIEmbeddings
+from langchain.vectorstores import PGVector
 
-# Generate embedding for chunk
-embedding_model = "models/embedding-001"
-result = genai.embed_content(
-    model=embedding_model,
-    content=chunk_text,
+# Initialize embeddings
+embeddings = GoogleGenerativeAIEmbeddings(
+    model="models/embedding-001",
+    google_api_key=settings.GEMINI_API_KEY,
     task_type="retrieval_document"
 )
-embedding_vector = result['embedding']
-```
 
-### Similarity Search
-
-```python
-# Find similar chunks (semantic search)
-query_embedding = genai.embed_content(
-    model="models/embedding-001",
-    content=user_query,
-    task_type="retrieval_query"
-)['embedding']
-
-similar_chunks = db.execute(
-    """
-    SELECT chunk_text, 1 - (embedding <=> %s::vector) AS similarity
-    FROM chunk_embeddings
-    WHERE job_id = %s
-    ORDER BY embedding <=> %s::vector
-    LIMIT 5
-    """,
-    (query_embedding, job_id, query_embedding)
+# Create vector store (automatic embedding generation)
+vectorstore = PGVector.from_documents(
+    documents=chunks,
+    embedding=embeddings,
+    connection_string=DATABASE_URL,
+    collection_name=f"job_{job_id}"
 )
 ```
+
+### Similarity Search (LangChain)
+
+```python
+# Semantic search (automatic query embedding + similarity)
+similar_chunks = vectorstore.similarity_search(
+    query="What is the main concept?",
+    k=5  # Top 5 most relevant chunks
+)
+
+# With similarity scores
+similar_chunks_with_scores = vectorstore.similarity_search_with_score(
+    query="Explain the process",
+    k=5
+)
+
+# For each chunk:
+for doc, score in similar_chunks_with_scores:
+    print(f"Similarity: {score}")
+    print(f"Content: {doc.page_content}")
+    print(f"Metadata: {doc.metadata}")
+```
+
+**LangChain Benefits**:
+- Automatic embedding generation and storage
+- Built-in similarity search with multiple algorithms
+- Metadata filtering
+- No manual SQL queries needed
 
 ---
 
