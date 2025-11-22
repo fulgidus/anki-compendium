@@ -1,0 +1,254 @@
+# Tiny AgentTask Template (3-5 Complexity Points)
+# Small scope changes
+
+id: "AGENTTASK-{AUTO}"
+type: tiny-agenttask
+complexity: 3-5
+created: "{TIMESTAMP}"
+
+# ========================================
+# GOAL - What we're building/fixing
+# ========================================
+goal:
+  summary: "[ROLE] [ONE_SENTENCE_DESCRIPTION]"
+  success_criteria:
+    - "[MEASURABLE_OUTCOME_1]"
+    - "[MEASURABLE_OUTCOME_2]"
+
+# ========================================
+# WHY - Business rationale
+# ========================================
+why:
+  business_value: "[WHY_THIS_MATTERS]"
+  user_impact: "[HOW_IT_HELPS_USERS]"
+  priority: "[MEDIUM|LOW]"
+
+# ========================================
+# CONTEXT - Focused context
+# ========================================
+context:
+  # Project Configuration
+  project_root: "{ABSOLUTE_PROJECT_ROOT}"
+  project_type: "[.NET|Node.js|Full-stack]"
+  
+  # Code Standards (relevant excerpt)
+  embedded_standards: |
+    # Naming Conventions
+    - PascalCase: classes, methods (C#)
+    - camelCase: variables, functions (TS/JS)
+    
+    # Best Practices
+    - Error handling with try-catch
+    - Meaningful names
+    - Small focused functions
+    - Descriptive commits
+  
+  # Memory Search Results
+  embedded_learnings: |
+    # From memory/Pattern/
+    [RELEVANT_PATTERNS_FOUND]
+    
+    # From memory/Learning/
+    [RELEVANT_SOLUTIONS_FOUND]
+  
+  # Files to Modify (2-5 files)
+  files_affected:
+    - "[ABSOLUTE_PATH_TO_FILE_1]"
+    - "[ABSOLUTE_PATH_TO_FILE_2]"
+  
+  # Dependencies
+  dependencies:
+    - "[DEPENDENCY_1]"
+
+# ========================================
+# IMPLEMENTATION - Technical approach
+# ========================================
+implementation:
+  approach: |
+    [HIGH_LEVEL_APPROACH]
+    [KEY_DECISIONS]
+  
+  tasks:
+    - step: 1
+      action: "[SPECIFIC_TASK_1]"
+      files: ["[FILE_1]"]
+      
+    - step: 2
+      action: "[SPECIFIC_TASK_2]"
+      files: ["[FILE_2]"]
+  
+  error_handling:
+    - "[ERROR_SCENARIO]"
+  
+  edge_cases:
+    - "[EDGE_CASE]"
+
+# ========================================
+# VALIDATION - Verification steps
+# ========================================
+validation:
+  unit_tests: |
+    [TEST_REQUIREMENTS]
+    [KEY_SCENARIOS]
+  
+  acceptance_criteria:
+    - "[CRITERION_1]"
+    - "[CRITERION_2]"
+  
+  manual_testing: |
+    [MANUAL_TEST_STEPS]
+
+# ========================================
+# COMPLETION - Definition of done
+# ========================================
+completion:
+  deliverables:
+    - "[WHAT_GETS_CREATED_1]"
+    - "[WHAT_GETS_CREATED_2]"
+  
+  documentation:
+    - "[DOC_TO_UPDATE]"
+  
+  learning_capture:
+    - action: "Store patterns if new"
+      location: "memory/Pattern/[topic].md"
+      content: "[WHAT_TO_STORE]"
+  
+  summary_required: |
+    Provide summary including:
+    - What was implemented
+    - How it works
+    - How to test it
+  
+  git_workflow: |
+    1. Create branch if needed
+    2. Implement changes
+    3. Run tests
+    4. Commit with descriptive message
+    5. Remove AI mentions from commit
+    6. Push changes
+
+# ========================================
+# EXECUTION PROCESS (7 steps for Tiny)
+# ========================================
+execution_process:
+  - step: 1
+    name: "Knowledge Review"
+    action: "Review embedded context and patterns"
+    
+  - step: 2
+    name: "Implementation"
+    action: "Implement feature following approach"
+    
+  - step: 3
+    name: "Testing"
+    action: "Write and run basic tests"
+    
+  - step: 4
+    name: "Review"
+    action: "Self-review code quality"
+    
+  - step: 5
+    name: "Documentation"
+    action: "Update documentation if needed"
+    
+  - step: 6
+    name: "Git Commit"
+    action: "Commit with descriptive message (no AI mentions)"
+    
+  - step: 7
+    name: "Git Push"
+    action: "Push changes and provide summary"
+
+# ========================================
+# ROLE ASSIGNMENT
+# ========================================
+assigned_to: "[SPECIALIST_ROLE]"
+assigned_by: "@PM"
+complexity_calculation:
+  file_impact: "[0-2]"
+  code_volume: "[0-3]"
+  integrations: "[0-2]"
+  security: "[0-1]"
+  coordination: "[0]"
+  total: "[3-5]"
+
+# ========================================
+# METADATA
+# ========================================
+metadata:
+  parent_story: "[STORY-ID if applicable]"
+  related_agenttasks: []
+  dependencies: []
+  
+---
+
+# Usage Instructions for PM
+
+## When to Use This Template
+Use for AgentTasks scored 3-5 complexity points:
+- Add validation logic
+- Add missing field to model
+- Small UI component
+- Simple API endpoint
+- Configuration update
+
+## Template Population Steps
+
+1. **Analyze Complexity** (3-5 points)
+   - File impact: 2-5 files
+   - Code volume: 50-200 lines
+   - Minimal integrations
+   - Low complexity
+
+2. **Search Memory First**
+   ```
+   Search memory/Pattern/ for relevant patterns
+   Search memory/Learning/ for solutions
+   Embed findings in embedded_learnings
+   ```
+
+3. **Gather Context**
+   - Get project root path
+   - Load relevant code standards
+   - Find similar examples in codebase
+
+4. **Define Goal Clearly**
+   - One sentence summary
+   - 2 measurable success criteria
+   - Business value statement
+
+5. **Plan Implementation**
+   - High-level approach
+   - Step-by-step tasks (2-3 steps)
+   - Files to modify
+
+6. **Set Validation Criteria**
+   - Basic test requirements
+   - Acceptance criteria
+   - Manual testing steps
+
+7. **Assign to Specialist**
+   - Choose appropriate role
+   - Provide complete context
+
+## Quality Checklist Before Delegation
+
+- [ ] All {PLACEHOLDERS} replaced
+- [ ] Memory search results embedded
+- [ ] File paths absolute
+- [ ] Success criteria measurable
+- [ ] Validation steps clear
+- [ ] Specialist role appropriate
+
+## Common Mistakes to Avoid
+
+❌ Overcomplicating simple tasks
+❌ Missing memory search
+❌ Vague success criteria
+❌ Incomplete file paths
+
+✅ Focused, clear context
+✅ Memory patterns included
+✅ Specific implementation steps
+✅ Clear validation

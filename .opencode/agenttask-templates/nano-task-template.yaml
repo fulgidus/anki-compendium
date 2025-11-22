@@ -1,0 +1,184 @@
+# Nano AgentTask Template (0-2 Complexity Points)
+# Trivial single-file changes
+
+id: "AGENTTASK-{AUTO}"
+type: nano-agenttask
+complexity: 0-2
+created: "{TIMESTAMP}"
+
+# ========================================
+# GOAL - What we're fixing/changing
+# ========================================
+goal:
+  summary: "[ROLE] [ONE_SENTENCE_DESCRIPTION]"
+  success_criteria:
+    - "[MEASURABLE_OUTCOME]"
+
+# ========================================
+# WHY - Quick rationale
+# ========================================
+why:
+  business_value: "[WHY_THIS_MATTERS]"
+  priority: "[LOW|MEDIUM]"
+
+# ========================================
+# CONTEXT - Minimal context needed
+# ========================================
+context:
+  # Project Configuration
+  project_root: "{ABSOLUTE_PROJECT_ROOT}"
+  
+  # Single File to Modify
+  file_affected: "[ABSOLUTE_PATH_TO_FILE]"
+  
+  # Code Standards (minimal excerpt)
+  embedded_standards: |
+    - Follow existing code style in file
+    - Meaningful variable/function names
+    - Descriptive commit message
+  
+  # What to Change
+  change_description: |
+    [SPECIFIC_CHANGE_NEEDED]
+    [LINE_NUMBERS_IF_KNOWN]
+    [EXPECTED_BEHAVIOR]
+
+# ========================================
+# IMPLEMENTATION - Simple approach
+# ========================================
+implementation:
+  approach: |
+    [ONE_PARAGRAPH_DESCRIPTION]
+  
+  tasks:
+    - step: 1
+      action: "[SPECIFIC_CHANGE]"
+      file: "[FILE_PATH]"
+
+# ========================================
+# VALIDATION - Simple verification
+# ========================================
+validation:
+  acceptance_criteria:
+    - "[VERIFICATION_STEP]"
+  
+  manual_testing: |
+    [HOW_TO_VERIFY_IT_WORKS]
+
+# ========================================
+# COMPLETION - Definition of done
+# ========================================
+completion:
+  deliverables:
+    - "[MODIFIED_FILE]"
+  
+  summary_required: |
+    Brief summary including:
+    - What was changed
+    - How to verify
+  
+  git_workflow: |
+    1. Make change
+    2. Verify change works
+    3. Commit with descriptive message
+    4. Remove AI mentions from commit
+    5. Push changes
+
+# ========================================
+# EXECUTION PROCESS (5 steps for Nano)
+# ========================================
+execution_process:
+  - step: 1
+    name: "Review Context"
+    action: "Understand the change needed"
+    
+  - step: 2
+    name: "Make Change"
+    action: "Edit file with required change"
+    
+  - step: 3
+    name: "Verify"
+    action: "Quick verification it works"
+    
+  - step: 4
+    name: "Git Commit"
+    action: "Commit with descriptive message (no AI mentions)"
+    
+  - step: 5
+    name: "Git Push"
+    action: "Push changes and provide summary"
+
+# ========================================
+# ROLE ASSIGNMENT
+# ========================================
+assigned_to: "[SPECIALIST_ROLE]"
+assigned_by: "@PM"
+complexity_calculation:
+  file_impact: "1"
+  code_volume: "<50 lines"
+  integrations: "0"
+  security: "0"
+  coordination: "0"
+  total: "[0-2]"
+
+# ========================================
+# METADATA
+# ========================================
+metadata:
+  parent_story: "[STORY-ID if applicable]"
+  related_agenttasks: []
+  
+---
+
+# Usage Instructions for PM
+
+## When to Use This Template
+Use for AgentTasks scored 0-2 complexity points:
+- Fix typo
+- Adjust config value
+- Update documentation
+- Simple refactor
+- One-line bug fix
+
+## Template Population Steps
+
+1. **Identify Simple Change** (0-2 points)
+   - Single file only
+   - <50 lines of code
+   - No external dependencies
+   - No security implications
+
+2. **Provide File Path**
+   - Exact absolute path to file
+   - Line numbers if known
+
+3. **Define Change Clearly**
+   - What needs to change
+   - Expected behavior after change
+
+4. **Set Simple Validation**
+   - How to verify it works
+   - Manual testing steps
+
+5. **Assign to Specialist**
+   - Choose appropriate role
+   - Ensure context is clear
+
+## Quality Checklist Before Delegation
+
+- [ ] File path is absolute and correct
+- [ ] Change is clearly described
+- [ ] Success criteria is measurable
+- [ ] Verification steps provided
+- [ ] Specialist role appropriate
+
+## Common Mistakes to Avoid
+
+❌ Underestimating complexity
+❌ Missing file path
+❌ Vague change description
+❌ No verification steps
+
+✅ Clear, specific change request
+✅ Exact file location
+✅ Simple verification method

@@ -1,0 +1,765 @@
+# Mega AgentTask Template (31+ Complexity Points)
+# SYSTEM-WIDE CHANGES - MUST BE CONVERTED TO STORY WITH MULTIPLE TASKS
+
+id: "STORY-{AUTO}"
+type: mega-story
+complexity: 31+
+created: "{TIMESTAMP}"
+
+# ========================================
+# ⚠️ CRITICAL WARNING - STORY REQUIRED
+# ========================================
+# Mega tasks (31+ points) MUST be converted to a STORY
+# containing multiple smaller AgentTasks.
+# 
+# This template should ONLY be used to:
+# 1. Document the overall story/epic
+# 2. Plan decomposition into smaller tasks
+# 3. Track overall progress
+# 
+# DO NOT assign Mega tasks directly to agents.
+# ALWAYS decompose into Medium (11-20) or Small (6-10) tasks.
+# ========================================
+
+# ========================================
+# STORY OVERVIEW
+# ========================================
+story:
+  title: "[EPIC/STORY TITLE]"
+  summary: |
+    [COMPREHENSIVE_DESCRIPTION]
+    [BUSINESS_CONTEXT]
+    [STRATEGIC_IMPORTANCE]
+  
+  business_value: |
+    [WHY_THIS_INITIATIVE_EXISTS]
+    [EXPECTED_BUSINESS_OUTCOMES]
+    [ROI_JUSTIFICATION]
+  
+  user_impact: |
+    [HOW_USERS_BENEFIT]
+    [USER_EXPERIENCE_IMPROVEMENTS]
+    [ADOPTION_EXPECTATIONS]
+  
+  priority: "[CRITICAL|HIGH]"
+  
+  estimated_timeline: "[WEEKS/MONTHS]"
+
+# ========================================
+# SCOPE & BOUNDARIES
+# ========================================
+scope:
+  in_scope:
+    - "[FEATURE/SYSTEM_1]"
+    - "[FEATURE/SYSTEM_2]"
+    - "[FEATURE/SYSTEM_3]"
+    - "[FEATURE/SYSTEM_4]"
+  
+  out_of_scope:
+    - "[EXPLICITLY_EXCLUDED_1]"
+    - "[EXPLICITLY_EXCLUDED_2]"
+  
+  future_considerations:
+    - "[FUTURE_ENHANCEMENT_1]"
+    - "[FUTURE_ENHANCEMENT_2]"
+
+# ========================================
+# STAKEHOLDERS
+# ========================================
+stakeholders:
+  business:
+    - role: "[ROLE_1]"
+      name: "[NAME]"
+      responsibility: "[WHAT_THEY_OWN]"
+    - role: "[ROLE_2]"
+      name: "[NAME]"
+      responsibility: "[WHAT_THEY_OWN]"
+  
+  technical:
+    - role: "Architect"
+      responsibility: "[ARCHITECTURE_OWNERSHIP]"
+    - role: "Developer"
+      responsibility: "[IMPLEMENTATION_OWNERSHIP]"
+    - role: "DevOps Engineer"
+      responsibility: "[DEPLOYMENT_OWNERSHIP]"
+  
+  approval_required_from:
+    - "[DECISION_MAKER_1]"
+    - "[DECISION_MAKER_2]"
+
+# ========================================
+# ARCHITECTURAL CONTEXT
+# ========================================
+architecture:
+  current_state: |
+    [CURRENT_ARCHITECTURE_OVERVIEW]
+    [EXISTING_SYSTEMS_INVOLVED]
+    [CURRENT_LIMITATIONS]
+  
+  target_state: |
+    [DESIRED_ARCHITECTURE]
+    [NEW_COMPONENTS]
+    [INTEGRATION_POINTS]
+  
+  migration_strategy: |
+    [HOW_TO_TRANSITION]
+    [BACKWARD_COMPATIBILITY]
+    [ROLLOUT_APPROACH]
+  
+  systems_affected:
+    - system: "[SYSTEM_1]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      changes: "[WHAT_CHANGES]"
+    - system: "[SYSTEM_2]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      changes: "[WHAT_CHANGES]"
+    - system: "[SYSTEM_3]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      changes: "[WHAT_CHANGES]"
+
+# ========================================
+# DECOMPOSITION PLAN (MANDATORY)
+# ========================================
+decomposition:
+  strategy: |
+    [HOW_THIS_STORY_WILL_BE_BROKEN_DOWN]
+    [DECOMPOSITION_APPROACH]
+    [DEPENDENCY_MANAGEMENT]
+  
+  phases:
+    - phase: 1
+      name: "[PHASE_1_NAME e.g., Foundation & Architecture]"
+      goal: "[PHASE_GOAL]"
+      duration: "[ESTIMATED_DURATION]"
+      tasks:
+        - task_id: "AGENTTASK-{TBD-1}"
+          title: "[TASK_TITLE]"
+          assigned_to: "[ROLE]"
+          complexity: "[6-20]"
+          description: "[BRIEF_DESCRIPTION]"
+        
+        - task_id: "AGENTTASK-{TBD-2}"
+          title: "[TASK_TITLE]"
+          assigned_to: "[ROLE]"
+          complexity: "[6-20]"
+          description: "[BRIEF_DESCRIPTION]"
+    
+    - phase: 2
+      name: "[PHASE_2_NAME e.g., Core Implementation]"
+      goal: "[PHASE_GOAL]"
+      duration: "[ESTIMATED_DURATION]"
+      dependencies:
+        - "Phase 1 completion"
+      tasks:
+        - task_id: "AGENTTASK-{TBD-3}"
+          title: "[TASK_TITLE]"
+          assigned_to: "[ROLE]"
+          complexity: "[6-20]"
+          description: "[BRIEF_DESCRIPTION]"
+        
+        - task_id: "AGENTTASK-{TBD-4}"
+          title: "[TASK_TITLE]"
+          assigned_to: "[ROLE]"
+          complexity: "[6-20]"
+          description: "[BRIEF_DESCRIPTION]"
+    
+    - phase: 3
+      name: "[PHASE_3_NAME e.g., Integration & Testing]"
+      goal: "[PHASE_GOAL]"
+      duration: "[ESTIMATED_DURATION]"
+      dependencies:
+        - "Phase 2 completion"
+      tasks:
+        - task_id: "AGENTTASK-{TBD-5}"
+          title: "[TASK_TITLE]"
+          assigned_to: "[ROLE]"
+          complexity: "[6-20]"
+          description: "[BRIEF_DESCRIPTION]"
+        
+        - task_id: "AGENTTASK-{TBD-6}"
+          title: "[TASK_TITLE]"
+          assigned_to: "[ROLE]"
+          complexity: "[6-20]"
+          description: "[BRIEF_DESCRIPTION]"
+    
+    - phase: 4
+      name: "[PHASE_4_NAME e.g., Deployment & Validation]"
+      goal: "[PHASE_GOAL]"
+      duration: "[ESTIMATED_DURATION]"
+      dependencies:
+        - "Phase 3 completion"
+      tasks:
+        - task_id: "AGENTTASK-{TBD-7}"
+          title: "[TASK_TITLE]"
+          assigned_to: "[ROLE]"
+          complexity: "[6-20]"
+          description: "[BRIEF_DESCRIPTION]"
+  
+  total_estimated_tasks: "[NUMBER]"
+  total_estimated_complexity: "[SUM_OF_ALL_TASKS]"
+
+# ========================================
+# CONTEXT - Comprehensive
+# ========================================
+context:
+  # Project Configuration
+  project_root: "{ABSOLUTE_PROJECT_ROOT}"
+  project_type: "[Enterprise|Microservices|Full-stack]"
+  
+  # Memory Search Results (comprehensive)
+  embedded_learnings: |
+    # From memory/Pattern/
+    [COMPREHENSIVE_ARCHITECTURE_PATTERNS]
+    [DESIGN_PATTERNS]
+    [INTEGRATION_PATTERNS]
+    
+    # From memory/Learning/
+    [LESSONS_FROM_SIMILAR_INITIATIVES]
+    [TROUBLESHOOTING_KNOWLEDGE]
+    [SOLUTIONS_DATABASE]
+    
+    # From memory/Knowledge/
+    [STRATEGIC_DECISIONS]
+    [TECHNOLOGY_CHOICES]
+    [PLATFORM_STANDARDS]
+  
+  # System Context
+  systems_map: |
+    [COMPLETE_SYSTEM_TOPOLOGY]
+    [INTEGRATION_DIAGRAM]
+    [DATA_FLOW_OVERVIEW]
+  
+  # Technology Stack
+  technologies:
+    backend:
+      - "[TECHNOLOGY_1]"
+      - "[TECHNOLOGY_2]"
+    frontend:
+      - "[TECHNOLOGY_1]"
+      - "[TECHNOLOGY_2]"
+    infrastructure:
+      - "[TECHNOLOGY_1]"
+      - "[TECHNOLOGY_2]"
+    data:
+      - "[TECHNOLOGY_1]"
+      - "[TECHNOLOGY_2]"
+  
+  # Dependencies (comprehensive)
+  dependencies:
+    external:
+      - name: "[EXTERNAL_DEPENDENCY_1]"
+        version: "[VERSION]"
+        impact: "[HIGH|MEDIUM|LOW]"
+      - name: "[EXTERNAL_DEPENDENCY_2]"
+        version: "[VERSION]"
+        impact: "[HIGH|MEDIUM|LOW]"
+    
+    internal:
+      - system: "[INTERNAL_SYSTEM_1]"
+        impact: "[HIGH|MEDIUM|LOW]"
+        changes_required: "[YES|NO]"
+      - system: "[INTERNAL_SYSTEM_2]"
+        impact: "[HIGH|MEDIUM|LOW]"
+        changes_required: "[YES|NO]"
+    
+    cross_team:
+      - team: "[TEAM_NAME]"
+        dependency: "[WHAT_IS_NEEDED]"
+        timeline: "[WHEN_NEEDED]"
+  
+  # Configuration
+  configuration: |
+    [COMPREHENSIVE_CONFIG_OVERVIEW]
+    [ENVIRONMENT_SETUP]
+    [FEATURE_FLAGS_STRATEGY]
+
+# ========================================
+# SUCCESS CRITERIA (STORY-LEVEL)
+# ========================================
+success_criteria:
+  functional:
+    - "[FUNCTIONAL_REQUIREMENT_1]"
+    - "[FUNCTIONAL_REQUIREMENT_2]"
+    - "[FUNCTIONAL_REQUIREMENT_3]"
+    - "[FUNCTIONAL_REQUIREMENT_4]"
+    - "[FUNCTIONAL_REQUIREMENT_5]"
+  
+  non_functional:
+    performance:
+      - metric: "[METRIC_1]"
+        target: "[TARGET_VALUE]"
+      - metric: "[METRIC_2]"
+        target: "[TARGET_VALUE]"
+    
+    scalability:
+      - "[SCALABILITY_REQUIREMENT_1]"
+      - "[SCALABILITY_REQUIREMENT_2]"
+    
+    reliability:
+      - "[RELIABILITY_REQUIREMENT_1]"
+      - "[RELIABILITY_REQUIREMENT_2]"
+    
+    security:
+      - "[SECURITY_REQUIREMENT_1]"
+      - "[SECURITY_REQUIREMENT_2]"
+    
+    usability:
+      - "[USABILITY_REQUIREMENT_1]"
+      - "[USABILITY_REQUIREMENT_2]"
+  
+  business_metrics:
+    - metric: "[BUSINESS_METRIC_1]"
+      target: "[TARGET_VALUE]"
+      measurement: "[HOW_TO_MEASURE]"
+    - metric: "[BUSINESS_METRIC_2]"
+      target: "[TARGET_VALUE]"
+      measurement: "[HOW_TO_MEASURE]"
+
+# ========================================
+# RISK MANAGEMENT (COMPREHENSIVE)
+# ========================================
+risks:
+  technical:
+    - risk: "[TECHNICAL_RISK_1]"
+      probability: "[HIGH|MEDIUM|LOW]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      mitigation: "[MITIGATION_STRATEGY]"
+      contingency: "[CONTINGENCY_PLAN]"
+    
+    - risk: "[TECHNICAL_RISK_2]"
+      probability: "[HIGH|MEDIUM|LOW]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      mitigation: "[MITIGATION_STRATEGY]"
+      contingency: "[CONTINGENCY_PLAN]"
+  
+  integration:
+    - risk: "[INTEGRATION_RISK_1]"
+      probability: "[HIGH|MEDIUM|LOW]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      mitigation: "[MITIGATION_STRATEGY]"
+      contingency: "[CONTINGENCY_PLAN]"
+  
+  organizational:
+    - risk: "[ORG_RISK_1 e.g., resource availability]"
+      probability: "[HIGH|MEDIUM|LOW]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      mitigation: "[MITIGATION_STRATEGY]"
+      contingency: "[CONTINGENCY_PLAN]"
+  
+  timeline:
+    - risk: "[TIMELINE_RISK_1]"
+      probability: "[HIGH|MEDIUM|LOW]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      mitigation: "[MITIGATION_STRATEGY]"
+      contingency: "[CONTINGENCY_PLAN]"
+  
+  business:
+    - risk: "[BUSINESS_RISK_1]"
+      probability: "[HIGH|MEDIUM|LOW]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      mitigation: "[MITIGATION_STRATEGY]"
+      contingency: "[CONTINGENCY_PLAN]"
+
+# ========================================
+# VALIDATION & TESTING STRATEGY
+# ========================================
+validation:
+  testing_approach: |
+    [OVERALL_TESTING_STRATEGY]
+    [TEST_PYRAMID_APPROACH]
+    [AUTOMATION_STRATEGY]
+  
+  test_phases:
+    - phase: "Unit Testing"
+      coverage_target: ">80%"
+      responsibility: "@Developer"
+      tools: "[TOOLS]"
+    
+    - phase: "Integration Testing"
+      scope: "[WHAT_TO_TEST]"
+      responsibility: "@Tester"
+      tools: "[TOOLS]"
+    
+    - phase: "E2E Testing"
+      critical_paths: "[CRITICAL_USER_FLOWS]"
+      responsibility: "@User"
+      tools: "[TOOLS]"
+    
+    - phase: "Performance Testing"
+      scenarios: "[LOAD_SCENARIOS]"
+      responsibility: "@QA-Engineer"
+      tools: "[TOOLS]"
+    
+    - phase: "Security Testing"
+      scope: "[SECURITY_SCOPE]"
+      responsibility: "@Security-Engineer"
+      tools: "[TOOLS]"
+    
+    - phase: "UAT"
+      participants: "[STAKEHOLDERS]"
+      duration: "[DURATION]"
+      acceptance_criteria: "[CRITERIA]"
+  
+  quality_gates:
+    - gate: "Code Quality"
+      criteria: "[CRITERIA]"
+      blocker: true
+    
+    - gate: "Test Coverage"
+      criteria: ">80%"
+      blocker: true
+    
+    - gate: "Performance Benchmarks"
+      criteria: "[CRITERIA]"
+      blocker: true
+    
+    - gate: "Security Scan"
+      criteria: "No Critical/High vulnerabilities"
+      blocker: true
+    
+    - gate: "Stakeholder Approval"
+      criteria: "[APPROVAL_CRITERIA]"
+      blocker: true
+
+# ========================================
+# DEPLOYMENT STRATEGY
+# ========================================
+deployment:
+  approach: "[Blue-Green|Canary|Rolling|Feature-Flag]"
+  
+  phases:
+    - phase: 1
+      name: "Development Environment"
+      timeline: "[WHEN]"
+      validation: "[VALIDATION_STEPS]"
+    
+    - phase: 2
+      name: "Staging Environment"
+      timeline: "[WHEN]"
+      validation: "[VALIDATION_STEPS]"
+      dependencies:
+        - "Phase 1 successful"
+    
+    - phase: 3
+      name: "Production Canary (10%)"
+      timeline: "[WHEN]"
+      validation: "[VALIDATION_STEPS]"
+      rollback_criteria: "[WHEN_TO_ROLLBACK]"
+      dependencies:
+        - "Phase 2 successful"
+        - "Stakeholder approval"
+    
+    - phase: 4
+      name: "Production Full Rollout"
+      timeline: "[WHEN]"
+      validation: "[VALIDATION_STEPS]"
+      rollback_criteria: "[WHEN_TO_ROLLBACK]"
+      dependencies:
+        - "Phase 3 successful (48h monitoring)"
+  
+  rollback_plan: |
+    [COMPREHENSIVE_ROLLBACK_PROCEDURE]
+    [ROLLBACK_TRIGGERS]
+    [ROLLBACK_VERIFICATION]
+  
+  monitoring: |
+    [MONITORING_STRATEGY]
+    [KEY_METRICS_TO_WATCH]
+    [ALERTING_THRESHOLDS]
+
+# ========================================
+# DOCUMENTATION REQUIREMENTS
+# ========================================
+documentation:
+  technical:
+    - type: "Architecture Decision Records (ADRs)"
+      location: "[PATH]"
+      owner: "@Architect"
+    
+    - type: "API Documentation"
+      location: "[PATH]"
+      owner: "@Developer"
+    
+    - type: "System Design"
+      location: "[PATH]"
+      owner: "@Architect"
+    
+    - type: "Database Schema"
+      location: "[PATH]"
+      owner: "@Database-Engineer"
+    
+    - type: "Deployment Runbooks"
+      location: "[PATH]"
+      owner: "@DevOps-Engineer"
+  
+  user:
+    - type: "User Guide"
+      location: "[PATH]"
+      owner: "@Product-Manager"
+    
+    - type: "Release Notes"
+      location: "[PATH]"
+      owner: "@Product-Manager"
+  
+  operational:
+    - type: "Monitoring Guide"
+      location: "[PATH]"
+      owner: "@System-Engineer"
+    
+    - type: "Troubleshooting Guide"
+      location: "[PATH]"
+      owner: "@System-Engineer"
+    
+    - type: "Incident Response"
+      location: "[PATH]"
+      owner: "@DevOps-Engineer"
+
+# ========================================
+# PROGRESS TRACKING
+# ========================================
+progress:
+  overall_status: "[NOT_STARTED|IN_PROGRESS|COMPLETED|BLOCKED]"
+  
+  phase_completion:
+    phase_1: "[0-100%]"
+    phase_2: "[0-100%]"
+    phase_3: "[0-100%]"
+    phase_4: "[0-100%]"
+  
+  completed_tasks: []
+  in_progress_tasks: []
+  blocked_tasks: []
+  
+  blockers:
+    - blocker: "[BLOCKER_DESCRIPTION]"
+      impact: "[HIGH|MEDIUM|LOW]"
+      owner: "[WHO_IS_RESOLVING]"
+      resolution_eta: "[DATE]"
+
+# ========================================
+# LEARNING CAPTURE
+# ========================================
+learning_capture:
+  - action: "Store architectural patterns"
+    location: "memory/Pattern/architecture/[topic].md"
+    content: "[ARCHITECTURAL_PATTERNS_ESTABLISHED]"
+  
+  - action: "Store integration solutions"
+    location: "memory/Learning/integration/[topic].md"
+    content: "[INTEGRATION_SOLUTIONS_DEVELOPED]"
+  
+  - action: "Store strategic decisions"
+    location: "memory/Knowledge/[topic].md"
+    content: "[STRATEGIC_DECISIONS_AND_RATIONALE]"
+  
+  - action: "Store lessons learned"
+    location: "memory/Learning/lessons/[topic].md"
+    content: "[LESSONS_LEARNED_THROUGHOUT]"
+
+# ========================================
+# METADATA
+# ========================================
+metadata:
+  created_by: "@PM"
+  approved_by: "[APPROVER]"
+  start_date: "[DATE]"
+  target_completion_date: "[DATE]"
+  actual_completion_date: "[DATE when done]"
+  
+  related_stories: []
+  related_initiatives: []
+  
+  labels:
+    - "[LABEL_1 e.g., strategic]"
+    - "[LABEL_2 e.g., platform]"
+    - "[LABEL_3 e.g., customer-facing]"
+
+---
+
+# Usage Instructions for PM
+
+## ⚠️ CRITICAL - This is a STORY Template, Not a Task
+
+Mega complexity (31+ points) items are **NEVER** executed as single tasks.
+They MUST be documented as STORIES and decomposed into smaller AgentTasks.
+
+## When to Use This Template
+
+Use this template when:
+- System-wide refactoring (multiple subsystems affected)
+- Complete new platform/module implementation
+- Major architectural changes
+- Enterprise feature rollout
+- Multi-team initiatives
+- Complexity exceeds 30 points
+
+## Mega Story Creation Process
+
+### 1. Initial Analysis (MANDATORY)
+
+Before creating a Mega story, confirm:
+- [ ] Complexity genuinely exceeds 30 points
+- [ ] Cannot be scoped down to Large (21-30) or smaller
+- [ ] Requires multi-phase implementation
+- [ ] Affects multiple systems/teams
+- [ ] Strategic importance justifies the size
+
+### 2. Story Documentation
+
+Populate this template completely:
+
+1. **Story Overview**
+   - Clear title and summary
+   - Business value and user impact
+   - Strategic importance
+   - Estimated timeline (weeks/months)
+
+2. **Scope Definition**
+   - List everything in scope
+   - Explicitly list what's out of scope
+   - Document future considerations
+
+3. **Stakeholder Mapping**
+   - Identify all business stakeholders
+   - Identify all technical stakeholders
+   - Define approval requirements
+
+4. **Architectural Context**
+   - Document current state
+   - Define target state
+   - Plan migration strategy
+   - Map all affected systems
+
+### 3. Decomposition Planning (MANDATORY)
+
+This is the MOST CRITICAL section:
+
+1. **Define Phases** (3-6 phases recommended)
+   - Each phase should have a clear goal
+   - Phases should build on each other
+   - Estimate duration per phase
+
+2. **Plan Tasks** (6-20 points each)
+   - Break each phase into Medium/Small tasks
+   - Assign appropriate roles
+   - Estimate complexity per task
+   - Define task dependencies
+
+3. **Validate Decomposition**
+   - [ ] Each task is 6-20 complexity points
+   - [ ] Tasks have clear boundaries
+   - [ ] Dependencies are mapped
+   - [ ] Each task is independently testable
+   - [ ] Sum of tasks equals story scope
+
+### 4. Risk Assessment (COMPREHENSIVE)
+
+Identify and plan for risks:
+- Technical risks and mitigations
+- Integration risks and contingencies
+- Organizational/resource risks
+- Timeline risks
+- Business risks
+
+### 5. Validation Strategy
+
+Define comprehensive testing approach:
+- Unit testing strategy
+- Integration testing scope
+- E2E testing critical paths
+- Performance testing scenarios
+- Security testing requirements
+- UAT planning
+- Quality gates
+
+### 6. Deployment Planning
+
+Plan the rollout:
+- Deployment approach (Blue-Green, Canary, etc.)
+- Phased deployment to environments
+- Rollback procedures
+- Monitoring strategy
+
+### 7. Documentation Requirements
+
+Plan all documentation:
+- Technical docs (ADRs, API docs, design docs)
+- User documentation (guides, release notes)
+- Operational docs (runbooks, troubleshooting)
+
+## Story Execution Workflow
+
+1. **PM creates Story** using this template
+2. **Architect reviews** architectural approach
+3. **Stakeholders approve** scope and timeline
+4. **PM creates individual AgentTasks** for Phase 1
+5. **Tasks are executed** by specialist agents
+6. **PM tracks progress** and updates story status
+7. **After Phase 1 complete**, create Phase 2 tasks
+8. **Repeat** until all phases complete
+9. **Final validation** against story success criteria
+10. **Story closure** with comprehensive lessons learned
+
+## Quality Checklist Before Story Approval
+
+- [ ] Story clearly documents business value
+- [ ] Scope is well-defined (in/out)
+- [ ] All stakeholders identified
+- [ ] Architectural context comprehensive
+- [ ] Decomposition plan complete (3+ phases)
+- [ ] Each task sized 6-20 points
+- [ ] Dependencies mapped
+- [ ] Risks identified with mitigations
+- [ ] Testing strategy defined
+- [ ] Deployment plan documented
+- [ ] Documentation requirements clear
+- [ ] Success criteria measurable
+- [ ] Stakeholder approval obtained
+
+## Common Mistakes to Avoid
+
+❌ Creating Mega task without decomposition
+❌ Trying to execute 31+ point task directly
+❌ Vague decomposition plan
+❌ Tasks larger than 20 points
+❌ Missing risk assessment
+❌ No deployment strategy
+❌ Incomplete architectural context
+❌ Missing stakeholder approval
+❌ No success criteria
+❌ Inadequate testing plan
+
+✅ Comprehensive story documentation
+✅ Clear decomposition into 6-20 point tasks
+✅ Phased implementation plan
+✅ Risk mitigation strategies
+✅ Comprehensive testing approach
+✅ Detailed deployment plan
+✅ Full architectural context
+✅ Stakeholder buy-in
+✅ Measurable success criteria
+✅ Quality gates defined
+
+## Story Monitoring
+
+Track progress using:
+- Phase completion percentages
+- Completed vs. in-progress vs. blocked tasks
+- Blocker tracking and resolution
+- Risk materialization and response
+- Success criteria achievement
+- Timeline adherence
+
+Update story status regularly (weekly recommended).
+
+## Story Closure
+
+When all phases complete:
+1. Validate all success criteria met
+2. Confirm all quality gates passed
+3. Verify all documentation complete
+4. Capture comprehensive lessons learned
+5. Update memory with patterns and knowledge
+6. Generate executive summary
+7. Obtain final stakeholder sign-off
+8. Archive story with all artifacts

@@ -1,0 +1,606 @@
+# Large AgentTask Template (21-30 Complexity Points)
+# Cross-system features - SHOULD BE SPLIT INTO MULTIPLE SMALLER TASKS
+
+id: "AGENTTASK-{AUTO}"
+type: large-agenttask
+complexity: 21-30
+created: "{TIMESTAMP}"
+
+# ========================================
+# ⚠️ WARNING - CONSIDER DECOMPOSITION
+# ========================================
+# Large tasks (21-30 points) should ideally be split into
+# multiple Medium (11-20) or Small (6-10) tasks.
+# 
+# Only create Large tasks when:
+# - The work is genuinely atomic and cannot be split
+# - There are strong technical reasons for single implementation
+# - The PM explicitly approves this size
+# ========================================
+
+# ========================================
+# GOAL - What we're building
+# ========================================
+goal:
+  summary: "[ROLE] [ONE_SENTENCE_DESCRIPTION]"
+  success_criteria:
+    - "[MEASURABLE_OUTCOME_1]"
+    - "[MEASURABLE_OUTCOME_2]"
+    - "[MEASURABLE_OUTCOME_3]"
+    - "[MEASURABLE_OUTCOME_4]"
+    - "[MEASURABLE_OUTCOME_5]"
+
+# ========================================
+# WHY - Business rationale
+# ========================================
+why:
+  business_value: "[WHY_THIS_MATTERS]"
+  user_impact: "[HOW_IT_HELPS_USERS]"
+  priority: "[HIGH|CRITICAL]"
+  justification_for_size: |
+    [WHY_THIS_CANNOT_BE_SPLIT]
+    [TECHNICAL_ATOMICITY_REASON]
+
+# ========================================
+# DECOMPOSITION ANALYSIS
+# ========================================
+decomposition:
+  split_attempted: "[YES|NO]"
+  split_reasoning: |
+    [WHY_SPLIT_WAS_OR_WASNT_POSSIBLE]
+    [DEPENDENCIES_PREVENTING_SPLIT]
+  
+  potential_subtasks:
+    - "[POTENTIAL_SUBTASK_1 if could be split]"
+    - "[POTENTIAL_SUBTASK_2 if could be split]"
+    - "[POTENTIAL_SUBTASK_3 if could be split]"
+
+# ========================================
+# CONTEXT - Comprehensive context
+# ========================================
+context:
+  # Project Configuration
+  project_root: "{ABSOLUTE_PROJECT_ROOT}"
+  project_type: "[.NET|Node.js|Full-stack|Microservices]"
+  
+  # Code Standards (complete from AGENTS.md)
+  embedded_standards: |
+    # C# Standards
+    - PascalCase: classes, methods, properties
+    - camelCase: variables, parameters
+    - Async/await for async operations
+    - try-catch-finally for error handling
+    - LINQ for queries
+    - Dependency Injection
+    - Repository pattern for data access
+    - 4 space indentation
+    
+    # TypeScript/JavaScript Standards
+    - camelCase: variables, functions
+    - PascalCase: classes, interfaces, types
+    - const/let (no var)
+    - Arrow functions for callbacks
+    - Explicit type imports and exports
+    - Async/await over promises
+    - Error boundaries for React
+    - 2 space indentation
+    
+    # Architecture Standards
+    - Separation of concerns
+    - Single responsibility principle
+    - Dependency inversion
+    - Interface-based design
+    - Clean architecture layers
+    
+    # API Standards
+    - RESTful conventions
+    - Consistent error responses
+    - Proper HTTP status codes
+    - API versioning
+    - Input validation
+    - Authentication/Authorization
+    
+    # Testing Standards
+    - Unit tests for all logic
+    - Integration tests for APIs
+    - E2E tests for critical flows
+    - >80% code coverage
+    - AAA pattern (Arrange-Act-Assert)
+    
+    # General
+    - Meaningful names
+    - Small focused functions/methods
+    - Comprehensive error handling
+    - Logging and monitoring
+    - Security best practices
+    - Performance considerations
+    - Descriptive commit messages
+  
+  # Memory Search Results (comprehensive)
+  embedded_learnings: |
+    # From memory/Pattern/
+    [COMPREHENSIVE_PATTERNS_FOUND]
+    [ARCHITECTURE_PATTERNS]
+    [DESIGN_PATTERNS]
+    
+    # From memory/Learning/
+    [RELEVANT_SOLUTIONS_FOUND]
+    [LESSONS_LEARNED]
+    [TROUBLESHOOTING_GUIDES]
+    
+    # From memory/Knowledge/
+    [RELEVANT_DECISIONS_FOUND]
+    [TECHNICAL_CHOICES]
+    [SYSTEM_CONSTRAINTS]
+  
+  # Code Examples (extensive from codebase)
+  code_examples: |
+    [EXISTING_PATTERNS_FROM_PROJECT]
+    [SIMILAR_IMPLEMENTATIONS]
+    [REFERENCE_ARCHITECTURES]
+  
+  # Files to Modify (10-20+ files)
+  files_affected:
+    backend:
+      - "[ABSOLUTE_PATH_TO_BACKEND_FILE_1]"
+      - "[ABSOLUTE_PATH_TO_BACKEND_FILE_2]"
+      - "[ABSOLUTE_PATH_TO_BACKEND_FILE_3]"
+    frontend:
+      - "[ABSOLUTE_PATH_TO_FRONTEND_FILE_1]"
+      - "[ABSOLUTE_PATH_TO_FRONTEND_FILE_2]"
+    shared:
+      - "[ABSOLUTE_PATH_TO_SHARED_FILE_1]"
+    infrastructure:
+      - "[ABSOLUTE_PATH_TO_INFRA_FILE_1]"
+    tests:
+      - "[ABSOLUTE_PATH_TO_TEST_FILE_1]"
+      - "[ABSOLUTE_PATH_TO_TEST_FILE_2]"
+  
+  # Dependencies (external and internal)
+  dependencies:
+    external:
+      - "[EXTERNAL_DEPENDENCY_1]"
+      - "[EXTERNAL_DEPENDENCY_2]"
+    internal:
+      - "[INTERNAL_SYSTEM_1]"
+      - "[INTERNAL_SYSTEM_2]"
+    blocking:
+      - "[BLOCKING_DEPENDENCY if any]"
+  
+  # Configuration
+  configuration: |
+    [COMPREHENSIVE_CONFIG_VALUES]
+    [ENVIRONMENT_VARIABLES]
+    [FEATURE_FLAGS]
+  
+  # Architecture Context
+  architecture: |
+    [SYSTEM_ARCHITECTURE_OVERVIEW]
+    [COMPONENT_INTERACTIONS]
+    [DATA_FLOW]
+
+# ========================================
+# IMPLEMENTATION - Detailed approach
+# ========================================
+implementation:
+  approach: |
+    [COMPREHENSIVE_TECHNICAL_APPROACH]
+    [ARCHITECTURE_PATTERNS_TO_USE]
+    [KEY_DESIGN_DECISIONS]
+    [INTEGRATION_STRATEGY]
+    [ROLLOUT_STRATEGY]
+  
+  phases:
+    - phase: 1
+      name: "[PHASE_1_NAME]"
+      tasks:
+        - step: 1.1
+          action: "[SPECIFIC_TASK]"
+          files: ["[FILES]"]
+        - step: 1.2
+          action: "[SPECIFIC_TASK]"
+          files: ["[FILES]"]
+    
+    - phase: 2
+      name: "[PHASE_2_NAME]"
+      tasks:
+        - step: 2.1
+          action: "[SPECIFIC_TASK]"
+          files: ["[FILES]"]
+        - step: 2.2
+          action: "[SPECIFIC_TASK]"
+          files: ["[FILES]"]
+    
+    - phase: 3
+      name: "[PHASE_3_NAME]"
+      tasks:
+        - step: 3.1
+          action: "[SPECIFIC_TASK]"
+          files: ["[FILES]"]
+        - step: 3.2
+          action: "[SPECIFIC_TASK]"
+          files: ["[FILES]"]
+  
+  pseudocode: |
+    // Comprehensive implementation flow
+    [DETAILED_PSEUDOCODE]
+    [ALGORITHM_DESCRIPTIONS]
+    [STATE_MACHINES]
+  
+  error_handling:
+    - scenario: "[ERROR_SCENARIO_1]"
+      strategy: "[HANDLING_STRATEGY]"
+    - scenario: "[ERROR_SCENARIO_2]"
+      strategy: "[HANDLING_STRATEGY]"
+    - scenario: "[ERROR_SCENARIO_3]"
+      strategy: "[HANDLING_STRATEGY]"
+  
+  edge_cases:
+    - case: "[EDGE_CASE_1]"
+      handling: "[HOW_TO_HANDLE]"
+    - case: "[EDGE_CASE_2]"
+      handling: "[HOW_TO_HANDLE]"
+    - case: "[EDGE_CASE_3]"
+      handling: "[HOW_TO_HANDLE]"
+  
+  security_considerations:
+    - "[SECURITY_CONCERN_1]"
+    - "[SECURITY_CONCERN_2]"
+    - "[SECURITY_CONCERN_3]"
+  
+  performance_considerations:
+    - "[PERFORMANCE_CONCERN_1]"
+    - "[PERFORMANCE_CONCERN_2]"
+    - "[PERFORMANCE_CONCERN_3]"
+
+# ========================================
+# VALIDATION - Comprehensive verification
+# ========================================
+validation:
+  unit_tests: |
+    [COMPREHENSIVE_UNIT_TEST_REQUIREMENTS]
+    [ALL_TEST_SCENARIOS]
+    [COVERAGE_EXPECTATIONS: >80%]
+    [MOCKING_STRATEGY]
+  
+  integration_tests: |
+    [INTEGRATION_TEST_REQUIREMENTS]
+    [API_CONTRACT_TESTS]
+    [DATABASE_INTEGRATION_TESTS]
+    [SERVICE_INTEGRATION_TESTS]
+  
+  e2e_tests: |
+    [END_TO_END_TEST_SCENARIOS]
+    [USER_FLOW_TESTS]
+    [CRITICAL_PATH_TESTS]
+  
+  acceptance_criteria:
+    - "[CRITERION_1]"
+    - "[CRITERION_2]"
+    - "[CRITERION_3]"
+    - "[CRITERION_4]"
+    - "[CRITERION_5]"
+  
+  manual_testing: |
+    [COMPREHENSIVE_MANUAL_TEST_STEPS]
+    [EXPLORATORY_TEST_AREAS]
+    [SMOKE_TEST_CHECKLIST]
+  
+  performance_testing:
+    - metric: "[METRIC_1]"
+      target: "[TARGET_VALUE]"
+      test: "[HOW_TO_TEST]"
+    - metric: "[METRIC_2]"
+      target: "[TARGET_VALUE]"
+      test: "[HOW_TO_TEST]"
+  
+  security_testing:
+    - "[SECURITY_TEST_1]"
+    - "[SECURITY_TEST_2]"
+    - "[SECURITY_TEST_3]"
+
+# ========================================
+# COMPLETION - Comprehensive definition of done
+# ========================================
+completion:
+  deliverables:
+    code:
+      - "[CODE_DELIVERABLE_1]"
+      - "[CODE_DELIVERABLE_2]"
+      - "[CODE_DELIVERABLE_3]"
+    tests:
+      - "[TEST_DELIVERABLE_1]"
+      - "[TEST_DELIVERABLE_2]"
+    infrastructure:
+      - "[INFRA_DELIVERABLE if any]"
+  
+  documentation:
+    technical:
+      - "[TECHNICAL_DOC_1]"
+      - "[TECHNICAL_DOC_2]"
+      - "[API_DOCUMENTATION]"
+    user:
+      - "[USER_DOC_1 if applicable]"
+    operational:
+      - "[RUNBOOK if applicable]"
+      - "[TROUBLESHOOTING_GUIDE]"
+  
+  learning_capture:
+    - action: "Store architecture patterns"
+      location: "memory/Pattern/architecture/[topic].md"
+      content: "[ARCHITECTURAL_PATTERNS_USED]"
+    
+    - action: "Store implementation solutions"
+      location: "memory/Learning/[topic].md"
+      content: "[PROBLEMS_SOLVED_AND_HOW]"
+    
+    - action: "Store technical decisions"
+      location: "memory/Knowledge/[topic].md"
+      content: "[DECISIONS_AND_RATIONALE]"
+  
+  summary_required: |
+    Provide comprehensive summary including:
+    - Executive summary of what was implemented
+    - Technical architecture overview
+    - Key design decisions and rationale
+    - How it works (high-level flow)
+    - How to test and use it
+    - Performance characteristics
+    - Security considerations
+    - Known limitations or gotchas
+    - Follow-up items or future work
+    - Migration/deployment notes
+  
+  git_workflow: |
+    1. Create feature branch with descriptive name
+    2. Implement in phases with intermediate commits
+    3. Run comprehensive test suite after each phase
+    4. Perform thorough self-review
+    5. Update all documentation
+    6. Final comprehensive testing
+    7. Commit with detailed descriptive message
+    8. Remove AI mentions from commit
+    9. Push changes
+    10. Prepare detailed PR description
+
+# ========================================
+# EXECUTION PROCESS (12 steps for Large)
+# ========================================
+execution_process:
+  - step: 1
+    name: "Branch Creation"
+    action: "Create feature branch with descriptive name"
+    
+  - step: 2
+    name: "Comprehensive Knowledge Review"
+    action: "Review all embedded context, standards, patterns, architecture"
+    
+  - step: 3
+    name: "Phase 1 Implementation"
+    action: "Implement first phase following approach"
+    
+  - step: 4
+    name: "Phase 1 Testing"
+    action: "Write and run tests for phase 1"
+    
+  - step: 5
+    name: "Phase 2 Implementation"
+    action: "Implement second phase"
+    
+  - step: 6
+    name: "Phase 2 Testing"
+    action: "Write and run tests for phase 2"
+    
+  - step: 7
+    name: "Phase 3 Implementation"
+    action: "Implement final phase"
+    
+  - step: 8
+    name: "Comprehensive Testing"
+    action: "Run all unit, integration, and e2e tests"
+    
+  - step: 9
+    name: "Thorough Review"
+    action: "Comprehensive self-review of all changes"
+    
+  - step: 10
+    name: "Documentation"
+    action: "Update all technical and user documentation"
+    
+  - step: 11
+    name: "Git Commit"
+    action: "Commit with detailed message (no AI mentions)"
+    
+  - step: 12
+    name: "Git Push & Summary"
+    action: "Push changes and provide comprehensive summary"
+
+# ========================================
+# ROLE ASSIGNMENT
+# ========================================
+assigned_to: "[SPECIALIST_ROLE]"
+assigned_by: "@PM"
+complexity_calculation:
+  file_impact: "[5-10]"
+  code_volume: "[6-10]"
+  integrations: "[3-5]"
+  security: "[1-3]"
+  coordination: "[1-2]"
+  total: "[21-30]"
+
+# ========================================
+# RISK MANAGEMENT
+# ========================================
+risks:
+  technical:
+    - risk: "[TECHNICAL_RISK_1]"
+      mitigation: "[MITIGATION_STRATEGY]"
+    - risk: "[TECHNICAL_RISK_2]"
+      mitigation: "[MITIGATION_STRATEGY]"
+  
+  integration:
+    - risk: "[INTEGRATION_RISK_1]"
+      mitigation: "[MITIGATION_STRATEGY]"
+  
+  timeline:
+    - risk: "[TIMELINE_RISK if any]"
+      mitigation: "[MITIGATION_STRATEGY]"
+
+# ========================================
+# METADATA
+# ========================================
+metadata:
+  parent_story: "[STORY-ID]"
+  related_agenttasks: []
+  dependencies: []
+  blocked_by: []
+  blocks: []
+  estimated_duration: "[ESTIMATE in hours/days]"
+  
+---
+
+# Usage Instructions for PM
+
+## ⚠️ IMPORTANT - Decomposition First
+
+Before creating a Large task, **ALWAYS attempt to decompose it** into smaller tasks.
+
+### Decomposition Decision Tree
+
+1. **Can this be split into independent features?**
+   - YES → Create separate Medium/Small tasks
+   - NO → Continue to #2
+
+2. **Can backend and frontend be implemented separately?**
+   - YES → Create separate tasks per layer
+   - NO → Continue to #3
+
+3. **Can this be implemented in independent phases?**
+   - YES → Create task per phase
+   - NO → Continue to #4
+
+4. **Are there strong technical reasons for atomicity?**
+   - NO → **MUST decompose** - go back to #1
+   - YES → Document justification and proceed
+
+## When to Use This Template
+
+Only use for AgentTasks scored 21-30 complexity points when:
+- Cross-system integration that cannot be split
+- Atomic database migration with code changes
+- Payment flow implementation (inherently atomic)
+- Complex refactoring that touches many systems
+- **PM has explicitly approved this task size**
+
+## Template Population Steps
+
+1. **Attempt Decomposition** (MANDATORY)
+   - Document decomposition attempt in `decomposition` section
+   - List potential subtasks if split is possible
+   - Justify why split is impossible if proceeding
+
+2. **Analyze Complexity** (21-30 points)
+   - File impact: 10-20+ files
+   - Code volume: 500+ lines
+   - Multiple integrations
+   - Security implications
+   - Cross-team coordination
+
+3. **Comprehensive Memory Search**
+   ```
+   Search memory/Pattern/ for all relevant patterns
+   Search memory/Learning/ for solutions and lessons
+   Search memory/Knowledge/ for decisions
+   Search for architecture patterns
+   Search for similar large implementations
+   Embed comprehensive findings
+   ```
+
+4. **Gather Complete Context**
+   - Get project root path
+   - Load complete code standards from AGENTS.md
+   - Find architecture documentation
+   - Include all code examples from codebase
+   - Map all file changes by layer
+   - List all dependencies (external and internal)
+   - Include configuration and environment details
+
+5. **Define Comprehensive Goal**
+   - One sentence summary
+   - 4-5 measurable success criteria
+   - Business value statement
+   - User impact description
+   - Priority justification
+
+6. **Plan Phased Implementation**
+   - Break into 3+ implementation phases
+   - Define step-by-step tasks per phase
+   - Map files to modify per step
+   - Plan error handling comprehensively
+   - Identify all edge cases
+   - Document security considerations
+   - Document performance considerations
+
+7. **Set Comprehensive Validation**
+   - Unit test requirements (>80% coverage)
+   - Integration test scenarios
+   - E2E test critical paths
+   - Acceptance criteria (4-5 items)
+   - Manual testing steps
+   - Performance testing targets
+   - Security testing requirements
+
+8. **Risk Assessment**
+   - Identify technical risks
+   - Identify integration risks
+   - Identify timeline risks
+   - Define mitigation strategies
+
+9. **Assign to Senior Specialist**
+   - Choose most experienced role
+   - Provide complete comprehensive context
+   - Ensure all placeholders replaced
+   - Verify justification for size
+
+## Quality Checklist Before Delegation
+
+- [ ] Decomposition attempted and documented
+- [ ] Justification for large size provided
+- [ ] PM approval obtained
+- [ ] All {PLACEHOLDERS} replaced with actual values
+- [ ] Comprehensive memory search results embedded
+- [ ] Complete code standards from AGENTS.md included
+- [ ] All file paths absolute and mapped by layer
+- [ ] Success criteria measurable (4-5 items)
+- [ ] Implementation broken into phases
+- [ ] Validation comprehensive (unit + integration + e2e)
+- [ ] Risks identified with mitigations
+- [ ] Senior specialist role appropriate
+- [ ] Estimated duration provided
+
+## Common Mistakes to Avoid
+
+❌ Creating Large task without decomposition attempt
+❌ Missing justification for large size
+❌ No PM approval
+❌ Leaving placeholder values
+❌ Forgetting comprehensive memory search
+❌ Missing architecture context
+❌ Vague success criteria
+❌ Incomplete context
+❌ No phased implementation plan
+❌ Insufficient validation steps
+❌ Missing risk assessment
+❌ No security/performance considerations
+
+✅ Decomposition documented
+✅ Clear atomicity justification
+✅ PM approval obtained
+✅ Complete embedded context
+✅ Memory patterns comprehensive
+✅ Architecture documented
+✅ Clear measurable goals (4-5)
+✅ Phased implementation plan
+✅ Comprehensive validation
+✅ Risk mitigation strategies
+✅ Security and performance addressed
