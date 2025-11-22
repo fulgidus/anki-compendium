@@ -1,0 +1,181 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 15 with pgvector extension for vector embeddings (RAG)
+  postgres:
+    image: pgvector/pgvector:pg15
+    container_name: anki-compendium-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-anki_compendium_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-ankiuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      # Create additional database for Keycloak
+      POSTGRES_MULTIPLE_DATABASES: keycloak
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts/postgres:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ankiuser} -d ${POSTGRES_DB:-anki_compendium_dev}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - anki_network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    restart: unless-stopped
+
+  # RabbitMQ for async task processing and event messaging
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: anki-compendium-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-changeme}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST:-/}
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./init-scripts/rabbitmq:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - anki_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    restart: unless-stopped
+
+  # MinIO for S3-compatible object storage (PDFs, Anki decks)
+  minio:
+    image: minio/minio:latest
+    container_name: anki-compendium-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-changeme123}
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Console UI
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - anki_network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    restart: unless-stopped
+
+  # MinIO Client for bucket initialization
+  minio-init:
+    image: minio/mc:latest
+    container_name: anki-compendium-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 ${MINIO_ROOT_USER:-minioadmin} ${MINIO_ROOT_PASSWORD:-changeme123};
+      /usr/bin/mc mb --ignore-existing myminio/pdfs;
+      /usr/bin/mc mb --ignore-existing myminio/decks;
+      /usr/bin/mc anonymous set download myminio/pdfs;
+      /usr/bin/mc anonymous set download myminio/decks;
+      echo 'MinIO buckets created successfully';
+      exit 0;
+      "
+    networks:
+      - anki_network
+    restart: "no"
+
+  # Keycloak for authentication and authorization
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: anki-compendium-keycloak
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-changeme}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${POSTGRES_USER:-ankiuser}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      KC_METRICS_ENABLED: true
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./init-scripts/keycloak:/opt/keycloak/data/import
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e 'GET /health/ready HTTP/1.1\r\nhost: http://localhost\r\nConnection: close\r\n\r\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    networks:
+      - anki_network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+    name: anki_compendium_postgres_data
+  rabbitmq_data:
+    driver: local
+    name: anki_compendium_rabbitmq_data
+  minio_data:
+    driver: local
+    name: anki_compendium_minio_data
+  keycloak_data:
+    driver: local
+    name: anki_compendium_keycloak_data
+
+networks:
+  anki_network:
+    driver: bridge
+    name: anki_compendium_network

@@ -1,0 +1,14 @@
+# Testing
+pytest>=7.4.3
+pytest-asyncio>=0.21.1
+pytest-cov>=4.1.0
+httpx>=0.25.2
+
+# Code Quality
+ruff>=0.1.6
+mypy>=1.7.1
+black>=23.11.0
+
+# Type Stubs
+types-passlib>=1.7.7
+sqlalchemy[mypy]>=2.0.23
