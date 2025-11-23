@@ -1,7 +1,16 @@
 """
 Celery application configuration for Anki Compendium.
 
-Handles distributed task processing for PDF-to-Anki deck generation.
+DEPRECATED: This module is no longer actively used. PDF processing is now handled by n8n workflows.
+
+Keeping this file for backward compatibility during migration. Configuration remains valid
+in case temporary fallback to Celery is needed during the n8n transition period.
+
+To fully remove:
+1. Verify n8n workflows are stable in production
+2. Delete this file
+3. Remove CELERY_* config from app.config
+4. Remove celery and redis dependencies from requirements.txt
 """
 
 import logging
@@ -28,7 +37,7 @@ def after_celery_logger_setup(logger, *args, **kwargs):
     pass
 
 
-# Create Celery application
+# Create Celery application (legacy - kept for compatibility)
 celery_app = Celery(
     "anki_compendium",
     broker=settings.CELERY_BROKER_URL,
@@ -67,13 +76,8 @@ celery_app.conf.update(
     worker_max_tasks_per_child=50,  # Restart worker after N tasks (memory management)
     worker_disable_rate_limits=False,
     
-    # Task Routing
-    task_routes={
-        "app.workers.tasks.process_pdf_task": {
-            "queue": "pdf_processing",
-            "routing_key": "pdf.process",
-        },
-    },
+    # Task Routing (legacy - no tasks exist)
+    task_routes={},
     
     # Retry Policy
     task_autoretry_for=(Exception,),
@@ -84,7 +88,7 @@ celery_app.conf.update(
     worker_task_log_format="[%(asctime)s: %(levelname)s/%(processName)s] [%(task_name)s(%(task_id)s)] %(message)s",
 )
 
-# Auto-discover tasks from workers module
+# Auto-discover tasks from workers module (will find none - deprecated)
 celery_app.autodiscover_tasks(["app.workers"])
 
-logger.info("Celery application initialized")
+logger.warning("Celery application initialized (DEPRECATED - using n8n workflows)")

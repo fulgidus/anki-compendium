@@ -1,0 +1,190 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: n8n
+  namespace: anki-compendium
+spec:
+  serviceName: n8n
+  replicas: 2  # Alta disponibilità
+  selector:
+    matchLabels:
+      app: n8n
+  template:
+    metadata:
+      labels:
+        app: n8n
+    spec:
+      containers:
+      - name: n8n
+        image: n8nio/n8n:latest
+        ports:
+        - containerPort: 5678
+          name: http
+        env:
+        # Database connection (PostgreSQL)
+        - name: DB_TYPE
+          value: postgresdb
+        - name: DB_POSTGRESDB_HOST
+          value: postgres
+        - name: DB_POSTGRESDB_PORT
+          value: "5432"
+        - name: DB_POSTGRESDB_DATABASE
+          value: n8n
+        - name: DB_POSTGRESDB_USER
+          value: ankiuser
+        - name: DB_POSTGRESDB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: anki-secrets
+              key: POSTGRES_PASSWORD
+        
+        # n8n configuration
+        - name: N8N_HOST
+          value: "n8n.ankicompendium.com"
+        - name: N8N_PORT
+          value: "5678"
+        - name: N8N_PROTOCOL
+          value: "https"
+        - name: WEBHOOK_URL
+          value: "https://n8n.ankicompendium.com/"
+        - name: N8N_EDITOR_BASE_URL
+          value: "https://n8n.ankicompendium.com/"
+        
+        # Execution settings
+        - name: EXECUTIONS_MODE
+          value: queue  # Use queue for scalability
+        - name: QUEUE_BULL_REDIS_HOST
+          value: redis  # Add Redis for queue
+        - name: QUEUE_BULL_REDIS_PORT
+          value: "6379"
+        - name: EXECUTIONS_DATA_SAVE_ON_SUCCESS
+          value: "all"
+        - name: EXECUTIONS_DATA_SAVE_ON_ERROR
+          value: "all"
+        - name: EXECUTIONS_DATA_MAX_AGE
+          value: "336"  # 14 days
+        
+        # External services (from secrets/env)
+        - name: GEMINI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: anki-secrets
+              key: GEMINI_API_KEY
+        - name: MINIO_ENDPOINT
+          value: "http://minio:9000"
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: anki-secrets
+              key: MINIO_ROOT_USER
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: anki-secrets
+              key: MINIO_ROOT_PASSWORD
+        - name: MINIO_BUCKET_PDFS
+          value: "pdfs"
+        - name: MINIO_BUCKET_DECKS
+          value: "decks"
+        - name: BACKEND_URL
+          value: "http://backend:8000"
+        
+        # Python dependencies for Code nodes
+        - name: NODE_FUNCTION_ALLOW_BUILTIN
+          value: "*"  # Allow all built-in modules
+        - name: NODE_FUNCTION_ALLOW_EXTERNAL
+          value: "PyMuPDF,langchain,langchain-text-splitters,genanki"
+        
+        volumeMounts:
+        - name: n8n-data
+          mountPath: /home/node/.n8n
+        
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 5678
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 5678
+          initialDelaySeconds: 10
+          periodSeconds: 5
+  
+  volumeClaimTemplates:
+  - metadata:
+      name: n8n-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: ovh-cinder-high-speed
+      resources:
+        requests:
+          storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n
+  namespace: anki-compendium
+spec:
+  selector:
+    app: n8n
+  ports:
+  - port: 5678
+    targetPort: 5678
+    name: http
+  type: ClusterIP
+
+---
+# Redis for n8n queue (optional but recommended for scaling)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: anki-compendium
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  namespace: anki-compendium
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379

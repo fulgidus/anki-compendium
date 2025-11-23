@@ -1,0 +1,482 @@
+{
+  "name": "Anki Compendium - PDF to Deck Processing",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "process-pdf",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "anki-process-pdf"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT j.*, u.email FROM jobs j JOIN users u ON j.user_id = u.id WHERE j.id = '{{ $json.body.job_id }}'",
+        "options": {}
+      },
+      "id": "fetch-job-details",
+      "name": "Fetch Job Details",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [450, 300],
+      "credentials": {
+        "postgres": {
+          "id": "postgres-anki-db",
+          "name": "Anki Compendium DB"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE jobs SET status = 'processing', progress_percent = 0, updated_at = NOW() WHERE id = '{{ $json.id }}'",
+        "options": {}
+      },
+      "id": "update-status-processing",
+      "name": "Update Status: Processing",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.source_file_presigned_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "download-pdf",
+      "name": "Download PDF from MinIO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "python",
+        "pythonCode": "# Stage 1-2: RAG Processing (Load PDF + Chunk)\nimport json\nimport base64\nfrom io import BytesIO\n\n# Input: PDF binary from previous node\npdf_binary = items[0].binary.data\njob_data = items[0].json\n\n# Load PDF using PyMuPDF\nimport fitz  # PyMuPDF\n\npdf_stream = BytesIO(base64.b64decode(pdf_binary))\ndoc = fitz.open(stream=pdf_stream, filetype=\"pdf\")\n\n# Extract text from pages\npage_start = job_data.get('page_start', 1)\npage_end = job_data.get('page_end', len(doc))\n\ndocuments = []\nfor page_num in range(page_start - 1, min(page_end, len(doc))):\n    page = doc[page_num]\n    text = page.get_text()\n    documents.append({\n        'page_number': page_num + 1,\n        'text': text,\n        'metadata': {\n            'source': job_data.get('source_filename'),\n            'page': page_num + 1\n        }\n    })\n\ndoc.close()\n\n# Chunking with LangChain\nfrom langchain.text_splitter import RecursiveCharacterTextSplitter\n\nchunk_size = job_data.get('chunk_size', 500)\nchunk_overlap = job_data.get('chunk_overlap', 100)\n\nsplitter = RecursiveCharacterTextSplitter(\n    chunk_size=chunk_size,\n    chunk_overlap=chunk_overlap,\n    length_function=len,\n    separators=[\"\\n\\n\", \"\\n\", \". \", \" \", \"\"]\n)\n\nchunks = []\nfor doc in documents:\n    text_chunks = splitter.split_text(doc['text'])\n    for i, chunk_text in enumerate(text_chunks):\n        chunks.append({\n            'chunk_index': len(chunks),\n            'page_number': doc['page_number'],\n            'text': chunk_text,\n            'metadata': doc['metadata']\n        })\n\n# Return results\nreturn [{\n    'json': {\n        'job_id': job_data.get('id'),\n        'num_pages': len(documents),\n        'num_chunks': len(chunks),\n        'chunks': chunks,\n        'job_data': job_data\n    }\n}]"
+      },
+      "id": "rag-processing",
+      "name": "RAG Processing (Load + Chunk)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE jobs SET progress_percent = 20, updated_at = NOW() WHERE id = '{{ $json.job_id }}'",
+        "options": {}
+      },
+      "id": "update-progress-20",
+      "name": "Update Progress: 20%",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-chunks-topics",
+      "name": "Loop Chunks (Topic Extraction)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "={{ $env.GEMINI_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={{ [{ \"parts\": [{ \"text\": \"Extract main topics and subtopics from this text. Return as JSON array with format: [{\\\"topic\\\": \\\"...\\\", \\\"subtopics\\\": [\\\"...\\\", ...]}]\\n\\nText:\\n\" + $json.text }] }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "gemini-topic-extraction",
+      "name": "Gemini: Topic Extraction",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1650, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "python",
+        "pythonCode": "# Stage 4: Topic Refinement\nimport json\nfrom collections import defaultdict\n\n# Aggregate all topics from chunks\ntopics_by_chunk = [item.json.get('topics', []) for item in items]\n\n# Deduplicate and consolidate\ntopic_map = defaultdict(set)\nfor chunk_topics in topics_by_chunk:\n    for topic_obj in chunk_topics:\n        topic_name = topic_obj.get('topic', '')\n        subtopics = topic_obj.get('subtopics', [])\n        topic_map[topic_name].update(subtopics)\n\n# Format refined topics\nrefined_topics = []\nfor topic, subtopics in topic_map.items():\n    refined_topics.append({\n        'main_topic': topic,\n        'subtopics': list(subtopics)\n    })\n\nreturn [{\n    'json': {\n        'refined_topics': refined_topics,\n        'num_topics': len(refined_topics)\n    }\n}]"
+      },
+      "id": "topic-refinement",
+      "name": "Topic Refinement",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "={{ $env.GEMINI_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={{ [{ \"parts\": [{ \"text\": \"Generate relevant Anki tags for these topics. Return as JSON array of strings.\\n\\nTopics:\\n\" + JSON.stringify($json.refined_topics) + \"\\n\\nSubject: \" + $('Fetch Job Details').item.json.subject + \"\\nChapter: \" + $('Fetch Job Details').item.json.chapter }] }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "gemini-tag-generation",
+      "name": "Gemini: Tag Generation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2050, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE jobs SET progress_percent = 40, updated_at = NOW() WHERE id = '{{ $('Fetch Job Details').item.json.id }}'",
+        "options": {}
+      },
+      "id": "update-progress-40",
+      "name": "Update Progress: 40%",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [2250, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-chunks-qa",
+      "name": "Loop Chunks (Q&A Generation)",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [2450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "={{ $env.GEMINI_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={{ [{ \"parts\": [{ \"text\": \"You are an expert educator creating Anki flashcards. Generate \" + $('Fetch Job Details').item.json.card_density + \" questions from this text. Return as JSON array: [{\\\"question\\\": \\\"...\\\"}]\\n\\nText:\\n\" + $json.text + \"\\n\\nTopics:\\n\" + JSON.stringify($('Topic Refinement').item.json.refined_topics) }] }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "gemini-question-generation",
+      "name": "Gemini: Question Generation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2650, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "={{ $env.GEMINI_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={{ [{ \"parts\": [{ \"text\": \"Answer this question in 2-10 sentences based on the provided context.\\n\\nQuestion: \" + $json.question + \"\\n\\nContext:\\n\" + $('Loop Chunks (Q&A Generation)').item.json.text }] }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "gemini-answer-generation",
+      "name": "Gemini: Answer Generation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2850, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE jobs SET progress_percent = 80, updated_at = NOW() WHERE id = '{{ $('Fetch Job Details').item.json.id }}'",
+        "options": {}
+      },
+      "id": "update-progress-80",
+      "name": "Update Progress: 80%",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [3050, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "python",
+        "pythonCode": "# Stage 8: Create Anki Deck\nimport genanki\nimport random\nimport base64\nfrom io import BytesIO\n\n# Collect all Q&A pairs\nqa_pairs = []\nfor item in items:\n    if 'question' in item.json and 'answer' in item.json:\n        qa_pairs.append({\n            'question': item.json['question'],\n            'answer': item.json['answer']\n        })\n\n# Get job details and tags\njob_data = $('Fetch Job Details').item.json\ntags = $('Gemini: Tag Generation').item.json.get('tags', [])\ndeck_name = job_data.get('chapter') or job_data.get('subject') or 'Generated Deck'\n\n# Create Anki deck\ndeck_id = random.randrange(1 << 30, 1 << 31)\ndeck = genanki.Deck(deck_id, deck_name)\n\n# Create note model (Basic front/back)\nmodel_id = random.randrange(1 << 30, 1 << 31)\nmodel = genanki.Model(\n    model_id,\n    'Basic (Anki Compendium)',\n    fields=[\n        {'name': 'Question'},\n        {'name': 'Answer'},\n    ],\n    templates=[\n        {\n            'name': 'Card 1',\n            'qfmt': '{{Question}}',\n            'afmt': '{{FrontSide}}<hr id=\"answer\">{{Answer}}',\n        },\n    ]\n)\n\n# Add notes to deck\nfor qa in qa_pairs:\n    note = genanki.Note(\n        model=model,\n        fields=[qa['question'], qa['answer']],\n        tags=tags\n    )\n    deck.add_note(note)\n\n# Generate .apkg file\npackage = genanki.Package(deck)\nbuffer = BytesIO()\npackage.write_to_file(buffer)\nbuffer.seek(0)\n\n# Return base64-encoded deck\ndeck_base64 = base64.b64encode(buffer.read()).decode('utf-8')\n\nreturn [{\n    'json': {\n        'deck_filename': f\"{deck_name.replace(' ', '_')}.apkg\",\n        'deck_base64': deck_base64,\n        'num_cards': len(qa_pairs)\n    }\n}]"
+      },
+      "id": "create-anki-deck",
+      "name": "Create Anki Deck",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3250, 300]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $env.MINIO_ENDPOINT }}/{{ $env.MINIO_BUCKET_DECKS }}/{{ $('Fetch Job Details').item.json.user_id }}/{{ $json.deck_filename }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "data",
+              "value": "={{ $json.deck_base64 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "upload-deck-minio",
+      "name": "Upload Deck to MinIO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [3450, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO decks (user_id, job_id, name, description, source_filename, card_count, file_path, file_size_bytes, tags, settings, created_at, updated_at) VALUES ('{{ $('Fetch Job Details').item.json.user_id }}', '{{ $('Fetch Job Details').item.json.id }}', '{{ $('Create Anki Deck').item.json.deck_filename }}', 'Generated from {{ $('Fetch Job Details').item.json.source_filename }}', '{{ $('Fetch Job Details').item.json.source_filename }}', {{ $('Create Anki Deck').item.json.num_cards }}, '{{ $('Upload Deck to MinIO').item.json.object_path }}', {{ $('Create Anki Deck').item.json.deck_base64.length }}, ARRAY['{{ $('Gemini: Tag Generation').item.json.tags.join(\"','\") }}'], '{}', NOW(), NOW()) RETURNING id",
+        "options": {}
+      },
+      "id": "create-deck-record",
+      "name": "Create Deck Record",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [3650, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE jobs SET status = 'completed', progress_percent = 100, result_deck_id = '{{ $json.id }}', completed_at = NOW(), updated_at = NOW() WHERE id = '{{ $('Fetch Job Details').item.json.id }}'",
+        "options": {}
+      },
+      "id": "update-status-completed",
+      "name": "Update Status: Completed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [3850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.BACKEND_URL }}/api/v1/notifications/send",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "user_id",
+              "value": "={{ $('Fetch Job Details').item.json.user_id }}"
+            },
+            {
+              "name": "type",
+              "value": "job_completed"
+            },
+            {
+              "name": "job_id",
+              "value": "={{ $('Fetch Job Details').item.json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-notification",
+      "name": "Send Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [4050, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"status\": \"success\", \"job_id\": $('Fetch Job Details').item.json.id, \"deck_id\": $('Create Deck Record').item.json.id } }}"
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [4250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE jobs SET status = 'failed', error_message = '{{ $json.error }}', updated_at = NOW() WHERE id = '{{ $('Fetch Job Details').item.json.id }}'",
+        "options": {}
+      },
+      "id": "error-handler",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [2000, 500],
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{"node": "Fetch Job Details", "type": "main", "index": 0}]]
+    },
+    "Fetch Job Details": {
+      "main": [[{"node": "Update Status: Processing", "type": "main", "index": 0}]]
+    },
+    "Update Status: Processing": {
+      "main": [[{"node": "Download PDF from MinIO", "type": "main", "index": 0}]]
+    },
+    "Download PDF from MinIO": {
+      "main": [[{"node": "RAG Processing (Load + Chunk)", "type": "main", "index": 0}]]
+    },
+    "RAG Processing (Load + Chunk)": {
+      "main": [[{"node": "Update Progress: 20%", "type": "main", "index": 0}]]
+    },
+    "Update Progress: 20%": {
+      "main": [[{"node": "Loop Chunks (Topic Extraction)", "type": "main", "index": 0}]]
+    },
+    "Loop Chunks (Topic Extraction)": {
+      "main": [[{"node": "Gemini: Topic Extraction", "type": "main", "index": 0}], [{"node": "Topic Refinement", "type": "main", "index": 0}]]
+    },
+    "Gemini: Topic Extraction": {
+      "main": [[{"node": "Loop Chunks (Topic Extraction)", "type": "main", "index": 0}]]
+    },
+    "Topic Refinement": {
+      "main": [[{"node": "Gemini: Tag Generation", "type": "main", "index": 0}]]
+    },
+    "Gemini: Tag Generation": {
+      "main": [[{"node": "Update Progress: 40%", "type": "main", "index": 0}]]
+    },
+    "Update Progress: 40%": {
+      "main": [[{"node": "Loop Chunks (Q&A Generation)", "type": "main", "index": 0}]]
+    },
+    "Loop Chunks (Q&A Generation)": {
+      "main": [[{"node": "Gemini: Question Generation", "type": "main", "index": 0}], [{"node": "Update Progress: 80%", "type": "main", "index": 0}]]
+    },
+    "Gemini: Question Generation": {
+      "main": [[{"node": "Gemini: Answer Generation", "type": "main", "index": 0}]]
+    },
+    "Gemini: Answer Generation": {
+      "main": [[{"node": "Loop Chunks (Q&A Generation)", "type": "main", "index": 0}]]
+    },
+    "Update Progress: 80%": {
+      "main": [[{"node": "Create Anki Deck", "type": "main", "index": 0}]]
+    },
+    "Create Anki Deck": {
+      "main": [[{"node": "Upload Deck to MinIO", "type": "main", "index": 0}]]
+    },
+    "Upload Deck to MinIO": {
+      "main": [[{"node": "Create Deck Record", "type": "main", "index": 0}]]
+    },
+    "Create Deck Record": {
+      "main": [[{"node": "Update Status: Completed", "type": "main", "index": 0}]]
+    },
+    "Update Status: Completed": {
+      "main": [[{"node": "Send Notification", "type": "main", "index": 0}]]
+    },
+    "Send Notification": {
+      "main": [[{"node": "Webhook Response", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 1,
+  "updatedAt": "2025-11-23T12:00:00.000Z",
+  "versionId": "1"
+}

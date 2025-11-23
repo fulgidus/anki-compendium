@@ -1,13 +1,23 @@
-# Anki Compendium - RAG Pipeline Architecture
+# Anki Compendium - Document Processing Pipeline Architecture
 
 ## Overview
 
-The RAG (Retrieval-Augmented Generation) pipeline transforms PDF documents into high-quality Anki flashcards through an 8-stage process powered by Google Gemini AI and **LangChain** (hybrid approach for accelerated development).
+This document describes the complete **document-to-flashcard pipeline** that transforms PDF documents into high-quality Anki flashcards through an 8-stage process.
 
-### LangChain Integration Strategy
-- **Stages 1-2**: LangChain document loaders and text splitters
-- **Stages 3-7**: LangChain prompt templates and chains with Gemini
-- **Stage 8**: Custom logic with genanki (Anki-specific formatting)
+### Terminology Clarification
+
+**RAG (Retrieval-Augmented Generation)** refers specifically to:
+- **Stages 1-2**: Document loading, chunking, embedding, and semantic retrieval
+- Used for: Context extraction and similarity search
+
+**AI Generation Pipeline** refers to:
+- **Stages 3-7**: LLM-powered topic extraction, question generation, and answer generation
+- **Stage 8**: Custom Anki deck creation
+
+### Technology Stack
+- **RAG Framework**: LangChain (document loaders, text splitters, embeddings)
+- **AI Model**: Google Gemini (1.5 Flash / 2.0 Flash)
+- **Anki Export**: genanki (custom logic, no LangChain)
 
 ---
 
@@ -15,14 +25,14 @@ The RAG (Retrieval-Augmented Generation) pipeline transforms PDF documents into 
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        RAG Pipeline Flow                         │
+│              Document Processing Pipeline Flow                   │
 └─────────────────────────────────────────────────────────────────┘
 
 PDF Input (Selected Pages)
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 1: Extraction & Recursion (🔗 LangChain)                  │
+│ Stage 1: Document Loading (🔗 RAG - LangChain)                  │
 │ ─────────────────────────────────────────────────────────────── │
 │ • LangChain PyMuPDFLoader for PDF text extraction               │
 │ • Handle multi-column layouts automatically                      │
@@ -35,22 +45,24 @@ PDF Input (Selected Pages)
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 2: Chunking (🔗 LangChain)                                │
+│ Stage 2: Chunking & Embeddings (🔗 RAG - LangChain)             │
 │ ─────────────────────────────────────────────────────────────── │
 │ • LangChain RecursiveCharacterTextSplitter                       │
 │ • Chunk size: 500 characters (configurable via admin settings)  │
 │ • Overlap: 100 characters (20%, configurable)                    │
 │ • Preserve sentence boundaries automatically                     │
+│ • Generate embeddings with Gemini Embeddings API                 │
+│ • Store in pgvector for similarity search (optional)             │
 │ • Code: splitter.split_documents(pages)                          │
 │ ─────────────────────────────────────────────────────────────── │
-│ Output: List of Document chunks with metadata                    │
+│ Output: List of Document chunks with embeddings + metadata       │
 └──────────────────────────────────────────────────────────────────┘
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 3: Topic & Subtopic Extraction (🔗 LangChain Chain)       │
+│ Stage 3: Topic & Subtopic Extraction (🤖 AI - LangChain + Gemini)│
 │ ─────────────────────────────────────────────────────────────── │
-│ • LangChain ChatPromptTemplate + Gemini 1.5 Flash                │
+│ • LangChain ChatPromptTemplate + Gemini Flash                    │
 │ • Analyze chunks to identify main topics                         │
 │ • Extract subtopics and hierarchical structure                   │
 │ • Code: topic_chain = prompt | llm | output_parser              │
@@ -61,9 +73,9 @@ PDF Input (Selected Pages)
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 4: Topic Refinement (🔗 LangChain Chain)                  │
+│ Stage 4: Topic Refinement (🤖 AI - LangChain + Gemini)          │
 │ ─────────────────────────────────────────────────────────────── │
-│ • LangChain chain with Gemini 1.5 Flash                          │
+│ • LangChain chain with Gemini Flash                              │
 │ • Consolidate duplicate or overlapping topics                    │
 │ • Improve topic naming and hierarchy                             │
 │ • Code: refinement_chain.invoke({"topics": topics})             │
@@ -73,9 +85,9 @@ PDF Input (Selected Pages)
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 5: Tag Generation (🔗 LangChain Chain)                    │
+│ Stage 5: Tag Generation (🤖 AI - LangChain + Gemini)            │
 │ ─────────────────────────────────────────────────────────────── │
-│ • LangChain chain with Gemini 1.5 Flash                          │
+│ • LangChain chain with Gemini Flash                              │
 │ • Generate relevant tags for each topic                          │
 │ • Include domain-specific keywords                               │
 │ • Code: tag_chain.invoke({"topics": refined_topics})            │
@@ -85,9 +97,9 @@ PDF Input (Selected Pages)
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 6: Question Generation (🔗 LangChain Chain)               │
+│ Stage 6: Question Generation (🤖 AI - LangChain + Gemini)       │
 │ ─────────────────────────────────────────────────────────────── │
-│ • LangChain ChatPromptTemplate with Gemini 1.5 Flash             │
+│ • LangChain ChatPromptTemplate with Gemini Flash                 │
 │ • Generate questions based on topics and chunks                  │
 │ • Apply spaced repetition principles (via prompt)                │
 │ • Focus on active recall (not recognition)                       │
@@ -99,9 +111,9 @@ PDF Input (Selected Pages)
     │
     ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│ Stage 7: Question Answering (🔗 LangChain Chain)                │
+│ Stage 7: Answer Generation (🤖 AI - LangChain + Gemini)         │
 │ ─────────────────────────────────────────────────────────────── │
-│ • LangChain chain with Gemini 1.5 Flash                          │
+│ • LangChain chain with Gemini Flash                              │
 │ • Generate answers for each question                             │
 │ • Validate answers against source text (via retrieval)           │
 │ • Ensure answer quality: 2-10 sentences (configurable)          │
@@ -130,13 +142,35 @@ Upload to MinIO → Update job status → Notify user
 
 ---
 
-## LangChain Implementation Benefits
+## Technology Stack Breakdown
 
-### Time Savings Breakdown
-- **Stage 1 (Extraction)**: -70% dev time (LangChain loader vs custom PyMuPDF)
-- **Stage 2 (Chunking)**: -80% dev time (battle-tested splitter)
-- **Stages 3-7 (Chains)**: -40% dev time (prompt templates, retry logic, error handling)
-- **Stage 8 (Cards)**: 0% (custom logic required)
+### RAG Components (Stages 1-2)
+- **Document Loading**: LangChain PyMuPDFLoader
+- **Text Chunking**: LangChain RecursiveCharacterTextSplitter  
+- **Embeddings**: Google Gemini Embeddings API (768-dim vectors)
+- **Vector Storage**: pgvector (PostgreSQL extension) - optional for similarity search
+
+**Purpose**: Extract and prepare document content for AI processing
+
+### AI Generation Components (Stages 3-7)
+- **LLM Orchestration**: LangChain chains and prompt templates
+- **AI Model**: Google Gemini Flash (1.5 or 2.0)
+- **Prompt Engineering**: Custom templates optimized for flashcard generation
+- **Output Parsing**: JSON structured outputs with retry logic
+
+**Purpose**: Generate flashcard questions and answers using LLM
+
+### Anki Export (Stage 8)
+- **Library**: genanki (Python, custom logic)
+- **Format**: .apkg (Anki package format)
+- **No LangChain**: Direct control over card structure and metadata
+
+**Purpose**: Create valid Anki deck files
+
+### Time Savings with LangChain
+- **RAG Stages (1-2)**: -75% dev time (battle-tested loaders and splitters)
+- **AI Stages (3-7)**: -40% dev time (prompt templates, retry logic, error handling)
+- **Anki Stage (8)**: 0% (custom logic required for Anki format)
 
 **Total estimated time savings: 2-3 weeks** on 8-10 week MVP timeline
 ```

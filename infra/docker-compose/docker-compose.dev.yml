@@ -34,37 +34,21 @@ services:
           memory: 256M
     restart: unless-stopped
 
-  # RabbitMQ for async task processing and event messaging
-  rabbitmq:
-    image: rabbitmq:3.12-management-alpine
-    container_name: anki-compendium-rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-admin}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-changeme}
-      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST:-/}
-    ports:
-      - "5672:5672"   # AMQP protocol
-      - "15672:15672" # Management UI
-    volumes:
-      - rabbitmq_data:/var/lib/rabbitmq
-      - ./init-scripts/rabbitmq:/docker-entrypoint-initdb.d
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    networks:
-      - anki_network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-    restart: unless-stopped
+  # RabbitMQ - DEPRECATED: Replaced by n8n workflow automation
+  # Keeping for backward compatibility during migration
+  # To remove: delete this service and rabbitmq_data volume
+  # rabbitmq:
+  #   image: rabbitmq:3.12-management-alpine
+  #   container_name: anki-compendium-rabbitmq
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-admin}
+  #     RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-changeme}
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #   networks:
+  #     - anki_network
+  #   restart: unless-stopped
 
   # MinIO for S3-compatible object storage (PDFs, Anki decks)
   minio:
@@ -165,9 +149,7 @@ volumes:
   postgres_data:
     driver: local
     name: anki_compendium_postgres_data
-  rabbitmq_data:
-    driver: local
-    name: anki_compendium_rabbitmq_data
+  # rabbitmq_data - DEPRECATED: Removed with n8n migration
   minio_data:
     driver: local
     name: anki_compendium_minio_data

@@ -100,7 +100,18 @@ class Settings(BaseSettings):
         default=[".pdf"]
     )
 
-    # Celery (Worker Configuration)
+    # n8n Workflow Automation
+    N8N_WEBHOOK_URL: str = Field(
+        default="http://localhost:5678",
+        description="n8n webhook base URL for workflow triggers"
+    )
+    N8N_WEBHOOK_SECRET: str = Field(
+        default="change-this-secret-in-production",
+        description="Secret token for authenticating n8n webhook calls"
+    )
+
+    # Celery (Worker Configuration) - DEPRECATED: Using n8n instead
+    # Keeping for backward compatibility during migration
     CELERY_BROKER_URL: str = Field(
         default="amqp://admin:changeme@localhost:5672/"
     )

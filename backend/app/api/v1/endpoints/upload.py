@@ -6,6 +6,7 @@ import logging
 from io import BytesIO
 from typing import Optional
 
+import httpx
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -110,6 +111,13 @@ async def upload_pdf(
                 detail=f"Invalid custom_tags format: {str(e)}. Expected JSON array of strings."
             )
     
+    # Validate filename exists
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Filename is required"
+        )
+    
     # Generate unique filename
     unique_filename = generate_unique_filename(str(current_user.id), file.filename)
     
@@ -164,16 +172,37 @@ async def upload_pdf(
             detail=f"Failed to create job: {str(e)}"
         )
     
-    # Queue job for processing in Celery
+    # Trigger n8n workflow via webhook
     try:
-        from app.workers.tasks import process_pdf_task
+        webhook_url = f"{settings.N8N_WEBHOOK_URL}/webhook/process-pdf"
+        webhook_payload = {
+            "job_id": str(job.id),
+            "user_id": str(current_user.id),
+            "source_filename": file.filename,
+            "source_file_path": object_path,
+            "page_start": page_start,
+            "page_end": page_end,
+            "card_density": card_density.value,
+            "subject": subject,
+            "chapter": chapter,
+            "custom_tags": tags_list
+        }
         
-        # Dispatch task to Celery worker
-        task = process_pdf_task.delay(str(job.id))
-        logger.info(f"Queued job {job.id} for processing (task_id: {task.id})")
+        headers = {
+            "Content-Type": "application/json",
+            "X-Webhook-Secret": settings.N8N_WEBHOOK_SECRET
+        }
         
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(webhook_url, json=webhook_payload, headers=headers)
+            response.raise_for_status()
+            
+        logger.info(f"Triggered n8n workflow for job {job.id}")
+        
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to trigger n8n workflow for job {job.id}: {e}")
+        # Job will remain in PENDING status and can be retried manually or via admin interface
     except Exception as e:
-        logger.error(f"Failed to queue job {job.id}: {e}")
-        # Job will remain in PENDING status and can be retried manually
+        logger.error(f"Unexpected error triggering n8n workflow for job {job.id}: {e}")
     
     return JobResponse.model_validate(job)
