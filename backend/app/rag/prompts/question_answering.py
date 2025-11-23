@@ -12,11 +12,11 @@ QUESTION_ANSWERING_PROMPT = ChatPromptTemplate.from_messages(
 Your goal is to provide concise, factually correct answers that facilitate effective learning.
 
 Output Format: JSON object:
-{
+{{
   "answer": "Clear, complete answer",
   "explanation": "Brief supporting explanation (optional)",
   "difficulty_rating": "easy|medium|hard"
-}
+}}
 
 Answer Guidelines:
 1. **Accuracy**: Provide factually correct information

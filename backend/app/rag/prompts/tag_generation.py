@@ -12,10 +12,10 @@ TAG_GENERATION_PROMPT = ChatPromptTemplate.from_messages(
 Your goal is to generate Anki-compatible tags that help students organize and filter their study materials.
 
 Output Format: JSON object with:
-{
+{{
   "tags": ["tag1", "tag2::subtag", ...],
-  "tag_hierarchy": {"parent_tag": ["subtag1", "subtag2"], ...}
-}
+  "tag_hierarchy": {{"parent_tag": ["subtag1", "subtag2"], ...}}
+}}
 
 Anki Tag Guidelines:
 1. Use lowercase with underscores (e.g., "machine_learning")
