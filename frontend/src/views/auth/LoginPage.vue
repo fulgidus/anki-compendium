@@ -1,137 +1,101 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useForm } from 'vee-validate';
-import { toTypedSchema } from '@vee-validate/zod';
-import * as z from 'zod';
-import { useToast } from 'primevue/usetoast';
-import { useAuthStore } from '@/stores/auth';
-import Card from 'primevue/card';
-import InputText from 'primevue/inputtext';
-import Password from 'primevue/password';
-import Button from 'primevue/button';
-import Message from 'primevue/message';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { message } from 'ant-design-vue'
+import { useAuthStore } from '@/stores/auth'
 
-const router = useRouter();
-const toast = useToast();
-const authStore = useAuthStore();
+const router = useRouter()
+const authStore = useAuthStore()
 
-const loading = ref(false);
-const errorMessage = ref('');
+const loading = ref(false)
+const formState = ref({
+  email: '',
+  password: '',
+})
 
-// Validation schema
-const loginSchema = toTypedSchema(
-  z.object({
-    email: z.string().email('Invalid email address').min(1, 'Email is required'),
-    password: z.string().min(1, 'Password is required'),
-  })
-);
+const rules = {
+  email: [
+    { required: true, message: 'Please input your email!', trigger: 'blur' },
+    { type: 'email', message: 'Please enter a valid email!', trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: 'Please input your password!', trigger: 'blur' },
+  ],
+}
 
-const { defineField, handleSubmit, errors } = useForm({
-  validationSchema: loginSchema,
-});
-
-const [email, emailAttrs] = defineField('email');
-const [password, passwordAttrs] = defineField('password');
-
-const onSubmit = handleSubmit(async (values) => {
-  loading.value = true;
-  errorMessage.value = '';
+const onFinish = async () => {
+  loading.value = true
 
   try {
-    await authStore.login(values.email, values.password);
-    toast.add({
-      severity: 'success',
-      summary: 'Success',
-      detail: 'Logged in successfully',
-      life: 3000,
-    });
-    router.push('/dashboard');
+    await authStore.login(formState.value.email, formState.value.password)
+    message.success('Logged in successfully')
+    router.push('/dashboard')
   } catch (error: any) {
-    errorMessage.value =
-      error.response?.data?.detail || 'Login failed. Please check your credentials.';
-    toast.add({
-      severity: 'error',
-      summary: 'Error',
-      detail: errorMessage.value,
-      life: 5000,
-    });
+    const errorMsg = error.response?.data?.detail || 'Login failed. Please check your credentials.'
+    message.error(errorMsg)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-});
+}
 
 const goToRegister = () => {
-  router.push('/register');
-};
+  router.push('/auth/register')
+}
 </script>
 
 <template>
   <div class="login-page">
-    <Card class="login-card">
-      <template #title>
-        <div class="text-center">
-          <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
-          <p class="text-surface-500">Sign in to your Anki Compendium account</p>
-        </div>
-      </template>
-      <template #content>
-        <Message v-if="errorMessage" severity="error" :closable="false" class="mb-4">
-          {{ errorMessage }}
-        </Message>
+    <a-card class="login-card" :bordered="false">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
+        <p class="text-gray-500">Sign in to your Anki Compendium account</p>
+      </div>
 
-        <form @submit="onSubmit" class="flex flex-col gap-4">
-          <div class="field">
-            <label for="email" class="font-semibold block mb-2">Email</label>
-            <InputText
-              id="email"
-              v-model="email"
-              v-bind="emailAttrs"
-              type="email"
-              placeholder="your.email@example.com"
-              class="w-full"
-              :class="{ 'p-invalid': errors.email }"
-              autocomplete="email"
-            />
-            <small v-if="errors.email" class="p-error">{{ errors.email }}</small>
-          </div>
-
-          <div class="field">
-            <label for="password" class="font-semibold block mb-2">Password</label>
-            <Password
-              id="password"
-              v-model="password"
-              v-bind="passwordAttrs"
-              placeholder="Enter your password"
-              :feedback="false"
-              toggle-mask
-              class="w-full"
-              :class="{ 'p-invalid': errors.password }"
-              :input-class="'w-full'"
-              autocomplete="current-password"
-            />
-            <small v-if="errors.password" class="p-error">{{ errors.password }}</small>
-          </div>
-
-          <Button
-            type="submit"
-            label="Sign In"
-            :loading="loading"
-            class="w-full"
-            :disabled="loading"
+      <a-form
+        :model="formState"
+        :rules="rules"
+        layout="vertical"
+        @finish="onFinish"
+      >
+        <a-form-item label="Email" name="email">
+          <a-input
+            v-model:value="formState.email"
+            type="email"
+            placeholder="your.email@example.com"
+            size="large"
+            autocomplete="email"
           />
+        </a-form-item>
 
-          <div class="text-center mt-4">
-            <p class="text-surface-600">
-              Don't have an account?
-              <a @click.prevent="goToRegister" href="#" class="text-primary font-semibold"
-                >Create one</a
-              >
-            </p>
-          </div>
-        </form>
-      </template>
-    </Card>
+        <a-form-item label="Password" name="password">
+          <a-input-password
+            v-model:value="formState.password"
+            placeholder="Enter your password"
+            size="large"
+            autocomplete="current-password"
+          />
+        </a-form-item>
+
+        <a-form-item>
+          <a-button
+            type="primary"
+            html-type="submit"
+            :loading="loading"
+            block
+            size="large"
+          >
+            Sign In
+          </a-button>
+        </a-form-item>
+
+        <div class="text-center">
+          <span class="text-gray-600">Don't have an account? </span>
+          <a @click.prevent="goToRegister" class="text-primary font-semibold cursor-pointer hover:underline">
+            Create one
+          </a>
+        </div>
+      </a-form>
+    </a-card>
   </div>
 </template>
 
@@ -149,18 +113,10 @@ const goToRegister = () => {
   width: 100%;
   max-width: 450px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
 }
 
-.field {
-  margin-bottom: 1rem;
-}
-
-a {
-  cursor: pointer;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
+.text-primary {
+  color: #1890ff;
 }
 </style>
