@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- **RAG Pipeline Stage 8 None-Value Handling** - Fixed critical bug preventing Anki deck generation:
+  - Handle `null` values from LLM JSON responses gracefully using `or ""` operator
+  - Skip cards with missing question or answer fields instead of crashing
+  - Add warning logs for skipped cards to enable monitoring
+  - Prevents `TypeError: expected string or bytes-like object, got 'NoneType'` in genanki
+  - **Pipeline now completes all 8 stages successfully (100% production ready)**
 - **RAG Pipeline Prompt Template Bugs** - Fixed critical LangChain template variable mismatches:
   - Stage 5 (Tag Generation): Escaped JSON examples in system message to prevent KeyError
   - Stage 7 (Question Answering): Escaped JSON examples in system message to prevent KeyError

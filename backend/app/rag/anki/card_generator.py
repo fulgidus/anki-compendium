@@ -1,10 +1,13 @@
 """
 Custom Anki card generation using genanki (Stage 8 - NO LangChain).
 """
+import logging
 import random
 from typing import Any
 
 import genanki
+
+logger = logging.getLogger(__name__)
 
 
 class AnkiCardGenerator:
@@ -210,12 +213,22 @@ hr#answer {
             source: Default source for all cards
         """
         for qa in qa_pairs:
+            # Handle None values from LLM by using 'or' operator
+            # Skip cards with missing question or answer
+            question = qa.get("question") or ""
+            answer = qa.get("answer") or ""
+            
+            # Skip cards that don't have both question and answer
+            if not question or not answer:
+                logger.warning(f"Skipping card with missing data: question={question!r}, answer={answer!r}")
+                continue
+            
             self.add_card(
-                question=qa.get("question", ""),
-                answer=qa.get("answer", ""),
-                context=qa.get("context", ""),
-                explanation=qa.get("explanation", ""),
-                difficulty=qa.get("difficulty", qa.get("difficulty_rating", "")),
+                question=question,
+                answer=answer,
+                context=qa.get("context") or "",
+                explanation=qa.get("explanation") or "",
+                difficulty=qa.get("difficulty") or qa.get("difficulty_rating") or "",
                 source=source,
                 tags=tags or [],
             )
