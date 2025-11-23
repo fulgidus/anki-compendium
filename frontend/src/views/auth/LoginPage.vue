@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useAuthStore } from '@/stores/auth'
+import { getErrorMessage } from '@/utils/errors'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -31,7 +32,7 @@ const onFinish = async () => {
     message.success('Logged in successfully')
     router.push('/dashboard')
   } catch (error: any) {
-    const errorMsg = error.response?.data?.detail || 'Login failed. Please check your credentials.'
+    const errorMsg = getErrorMessage(error, 'Login failed. Please check your credentials.')
     message.error(errorMsg)
   } finally {
     loading.value = false

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/api/client'
+import { getErrorMessage } from '@/utils/errors'
 import type { Deck, DeckFilters, DeckStats } from '@/types'
 
 export const useDecksStore = defineStore('decks', () => {

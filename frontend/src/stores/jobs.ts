@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/api/client'
+import { getErrorMessage } from '@/utils/errors'
 import type { Job, JobFilters } from '@/types'
 
 export const useJobsStore = defineStore('jobs', () => {
@@ -39,7 +40,7 @@ export const useJobsStore = defineStore('jobs', () => {
       const fetchedJobs = await api.getJobs(filters)
       jobs.value = fetchedJobs
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to fetch jobs'
+      error.value = getErrorMessage(err, 'Failed to fetch jobs')
       console.error('Error fetching jobs:', err)
     } finally {
       loading.value = false
@@ -61,7 +62,7 @@ export const useJobsStore = defineStore('jobs', () => {
       currentJob.value = job
       return job
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to fetch job'
+      error.value = getErrorMessage(err, 'Failed to fetch job')
       console.error('Error fetching job:', err)
       return null
     }
@@ -91,7 +92,7 @@ export const useJobsStore = defineStore('jobs', () => {
       
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to delete job'
+      error.value = getErrorMessage(err, 'Failed to delete job')
       console.error('Error deleting job:', err)
       return false
     }
@@ -103,7 +104,7 @@ export const useJobsStore = defineStore('jobs', () => {
       updateJobInList(job)
       return job
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to retry job'
+      error.value = getErrorMessage(err, 'Failed to retry job')
       console.error('Error retrying job:', err)
       return null
     }

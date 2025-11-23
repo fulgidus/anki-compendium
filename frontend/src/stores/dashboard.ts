@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { api } from '@/api/client'
+import { getErrorMessage } from '@/utils/errors'
 import type { DashboardStats, Activity, Deck } from '@/types'
 
 export const useDashboardStore = defineStore('dashboard', () => {
@@ -36,7 +37,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       recentActivity.value = activityData
       recentDecks.value = decksData.slice(0, 5)
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to load dashboard data'
+      error.value = getErrorMessage(err, 'Failed to load dashboard data')
       console.error('Error fetching dashboard data:', err)
     } finally {
       loading.value = false

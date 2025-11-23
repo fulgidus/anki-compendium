@@ -2,8 +2,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { useAuthStore } from '@/stores/auth'
+import { getErrorMessage } from '@/utils/errors'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const loading = ref(false)
+
 const formState = ref({
   username: '',
   email: '',
@@ -12,18 +17,56 @@ const formState = ref({
 })
 
 const rules = {
-  username: [{ required: true, message: 'Username is required' }],
-  email: [
-    { required: true, message: 'Email is required' },
-    { type: 'email', message: 'Invalid email' }
+  username: [
+    { required: true, message: 'Username is required', trigger: 'blur' },
+    { min: 3, max: 50, message: 'Username must be 3-50 characters', trigger: 'blur' },
+    { pattern: /^[a-zA-Z0-9_-]+$/, message: 'Username can only contain letters, numbers, hyphens, and underscores', trigger: 'blur' }
   ],
-  password: [{ required: true, message: 'Password is required' }],
-  confirmPassword: [{ required: true, message: 'Please confirm password' }]
+  email: [
+    { required: true, message: 'Email is required', trigger: 'blur' },
+    { type: 'email', message: 'Invalid email', trigger: 'blur' }
+  ],
+  password: [
+    { required: true, message: 'Password is required', trigger: 'blur' },
+    { min: 8, message: 'Password must be at least 8 characters', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: 'Please confirm password', trigger: 'blur' },
+    {
+      validator: (_rule: any, value: string) => {
+        if (!value || value === formState.value.password) {
+          return Promise.resolve()
+        }
+        return Promise.reject('Passwords do not match')
+      },
+      trigger: 'blur'
+    }
+  ]
 }
 
 const onFinish = async () => {
-  message.success('Registration successful!')
-  router.push('/auth/login')
+  // Validate passwords match
+  if (formState.value.password !== formState.value.confirmPassword) {
+    message.error('Passwords do not match')
+    return
+  }
+
+  loading.value = true
+
+  try {
+    await authStore.register(
+      formState.value.email,
+      formState.value.password,
+      formState.value.username
+    )
+    message.success('Registration successful! Redirecting to dashboard...')
+    router.push('/dashboard')
+  } catch (error: any) {
+    const errorMsg = getErrorMessage(error, 'Registration failed. Please try again.')
+    message.error(errorMsg)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -47,7 +90,7 @@ const onFinish = async () => {
           <a-input-password v-model:value="formState.confirmPassword" size="large" />
         </a-form-item>
         <a-form-item>
-          <a-button type="primary" html-type="submit" block size="large">
+          <a-button type="primary" html-type="submit" :loading="loading" block size="large">
             Sign Up
           </a-button>
         </a-form-item>

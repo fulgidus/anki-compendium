@@ -1,12 +1,12 @@
 import { ref, computed } from 'vue'
 import type { PdfFile, UploadProgress, UploadRequest, UploadResponse } from '@/types'
-import { useToast } from 'primevue/usetoast'
+import { message } from 'ant-design-vue'
+import { getErrorMessage } from '@/utils/errors'
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 const ALLOWED_FILE_TYPE = 'application/pdf'
 
 export function usePdfUpload() {
-  const toast = useToast()
   
   const pdfFile = ref<PdfFile | null>(null)
   const isUploading = ref(false)
@@ -82,12 +82,7 @@ export function usePdfUpload() {
     const validationError = validateFile(file)
     if (validationError) {
       error.value = validationError
-      toast.add({
-        severity: 'error',
-        summary: 'Invalid File',
-        detail: validationError,
-        life: 5000
-      })
+      message.error(validationError)
       return false
     }
 
@@ -95,22 +90,12 @@ export function usePdfUpload() {
       // Load PDF file
       pdfFile.value = await loadPdfFile(file)
       
-      toast.add({
-        severity: 'success',
-        summary: 'File Selected',
-        detail: `${file.name} (${formatFileSize(file.size)})`,
-        life: 3000
-      })
+      message.success(`File selected: ${file.name} (${formatFileSize(file.size)})`)
       
       return true
     } catch (err) {
       error.value = 'Failed to load PDF file'
-      toast.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load PDF file',
-        life: 5000
-      })
+      message.error('Failed to load PDF file')
       return false
     }
   }
@@ -160,24 +145,14 @@ export function usePdfUpload() {
         uploadProgress.value = progress
       })
 
-      toast.add({
-        severity: 'success',
-        summary: 'Upload Successful',
-        detail: 'Your PDF is being processed',
-        life: 3000
-      })
+      message.success('Upload successful! Your PDF is being processed')
 
       return response
     } catch (err: any) {
-      const errorMessage = err.response?.data?.detail || 'Failed to upload PDF'
+      const errorMessage = getErrorMessage(err, 'Failed to upload PDF')
       error.value = errorMessage
       
-      toast.add({
-        severity: 'error',
-        summary: 'Upload Failed',
-        detail: errorMessage,
-        life: 5000
-      })
+      message.error(`Upload failed: ${errorMessage}`)
       
       return null
     } finally {
@@ -203,12 +178,7 @@ export function usePdfUpload() {
    */
   const removeFile = () => {
     reset()
-    toast.add({
-      severity: 'info',
-      summary: 'File Removed',
-      detail: 'Selected file has been removed',
-      life: 2000
-    })
+    message.info('File removed')
   }
 
   return {

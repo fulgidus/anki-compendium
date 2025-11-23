@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { api } from '@/api/client'
+import { getErrorMessage } from '@/utils/errors'
 import type { UserProfile, UserPreferences, UserStats, PasswordChangeRequest } from '@/types'
 
 export const useUserStore = defineStore('user', () => {
@@ -24,7 +25,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       profile.value = await api.getUserProfile()
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to fetch profile'
+      error.value = getErrorMessage(err, 'Failed to fetch profile')
       console.error('Error fetching profile:', err)
     } finally {
       loading.value = false
@@ -49,7 +50,7 @@ export const useUserStore = defineStore('user', () => {
       profile.value = updatedProfile
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to update profile'
+      error.value = getErrorMessage(err, 'Failed to update profile')
       console.error('Error updating profile:', err)
       return false
     } finally {
@@ -71,7 +72,7 @@ export const useUserStore = defineStore('user', () => {
       
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to update preferences'
+      error.value = getErrorMessage(err, 'Failed to update preferences')
       console.error('Error updating preferences:', err)
       return false
     } finally {
@@ -87,7 +88,7 @@ export const useUserStore = defineStore('user', () => {
       await api.changePassword(request.currentPassword, request.newPassword)
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to change password'
+      error.value = getErrorMessage(err, 'Failed to change password')
       console.error('Error changing password:', err)
       return false
     } finally {
@@ -103,7 +104,7 @@ export const useUserStore = defineStore('user', () => {
       await api.deleteUserAccount()
       return true
     } catch (err: any) {
-      error.value = err.response?.data?.message || 'Failed to delete account'
+      error.value = getErrorMessage(err, 'Failed to delete account')
       console.error('Error deleting account:', err)
       return false
     } finally {
