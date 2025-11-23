@@ -24,7 +24,7 @@ class JSONFormatter(logging.Formatter):
 
 
 def setup_logging() -> None:
-    """Setup application logging."""
+    """Setup application logging with structured format."""
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(JSONFormatter())
 
@@ -32,6 +32,15 @@ def setup_logging() -> None:
     root_logger.addHandler(handler)
     root_logger.setLevel(logging.INFO)
 
-    # Set log level for specific loggers
+    # Set log level for specific loggers to reduce noise
     logging.getLogger("uvicorn").setLevel(logging.WARNING)
-    logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
+    logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.pool").setLevel(logging.WARNING)
+    
+    # Ensure our application logger is visible
+    logging.getLogger("anki_compendium").setLevel(logging.INFO)
+
+
+# Create application logger instance
+logger = logging.getLogger("anki_compendium")

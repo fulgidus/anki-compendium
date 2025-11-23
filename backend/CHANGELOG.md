@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - 2025-11-23
+- **Dashboard API endpoints** for user statistics and activity feeds
+  - `GET /api/v1/dashboard/stats` - Get dashboard statistics (total decks, cards, active jobs, recent activity)
+  - `GET /api/v1/dashboard/activity` - Get recent activity feed (combined jobs and decks)
+- **User Profile and Preferences API endpoints**
+  - `GET /api/v1/user/profile` - Get current user profile
+  - `PUT /api/v1/user/profile` - Update user profile (display name)
+  - `GET /api/v1/user/stats` - Get user statistics
+  - `GET /api/v1/user/preferences` - Get user preferences
+  - `PUT /api/v1/user/preferences` - Update user preferences (default cards, difficulty, notifications)
+  - `POST /api/v1/user/change-password` - Change password (placeholder for Keycloak integration)
+  - `DELETE /api/v1/user/account` - Delete user account (soft delete with confirmation)
+- **New Pydantic schemas**
+  - `DashboardStats` - Dashboard statistics response model
+  - `ActivityItem` - Activity feed item model
+  - `UserStats` - User statistics response model
+  - `UserPreferences` - User preferences model with defaults
+  - `UserPreferencesUpdate` - User preferences update request model
+  - `UserProfileUpdate` - User profile update request model
+  - `PasswordChange` - Password change request model
+  - `AccountDeletion` - Account deletion confirmation model
+- **New service layer**
+  - `DashboardService` - Business logic for dashboard statistics and activity aggregation
+  - `UserService` - Business logic for user profile and preferences management
+- **Database schema updates**
+  - Added `preferences` JSONB column to `users` table for storing user preferences
+  - Created Alembic migration: `20251123_add_user_preferences_field.py`
+
+### Changed
+- Extended `User` model with `preferences` JSONB field
+- Updated API router to include dashboard and user endpoints
+- Enhanced user schema with preferences and statistics models
+
 ### Fixed
 - **RAG Pipeline Stage 8 None-Value Handling** - Fixed critical bug preventing Anki deck generation:
   - Handle `null` values from LLM JSON responses gracefully using `or ""` operator

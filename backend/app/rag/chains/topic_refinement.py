@@ -67,12 +67,19 @@ async def refine_topics(
 
     # Serialize extracted topics for the prompt
     topics_json = str(extracted_topics)
+    
+    # Build context strings
+    page_range_str = ""  # Can be enhanced later
+    if subject:
+        document_context = f"Title: {document_title}, Subject: {subject}"
+    else:
+        document_context = f"Title: {document_title}"
 
     result = await chain.ainvoke(
         {
-            "extracted_topics": topics_json,
-            "document_title": document_title,
-            "subject": subject,
+            "raw_topics": topics_json,
+            "document_title": document_context,
+            "page_range": page_range_str,
         }
     )
 

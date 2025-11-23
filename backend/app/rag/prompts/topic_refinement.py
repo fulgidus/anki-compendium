@@ -11,11 +11,7 @@ TOPIC_REFINEMENT_PROMPT = ChatPromptTemplate.from_messages(
 
 Your goal is to consolidate, deduplicate, and organize topics extracted from multiple text chunks.
 
-Output Format: JSON object with:
-{
-  "refined_topics": ["Topic 1", "Topic 2", ...],
-  "topic_hierarchy": {"Parent Topic": ["Subtopic 1", "Subtopic 2"], ...}
-}
+Return a JSON object with main_topics (array of strings) and topic_hierarchy (object).
 
 Guidelines:
 1. Merge similar or duplicate topics
@@ -33,11 +29,7 @@ Guidelines:
 {document_title}
 {page_range}
 
-Refine these topics into a clean, organized structure. Return as JSON:
-{{
-  "refined_topics": [...],
-  "topic_hierarchy": {{...}}
-}}""",
+Refine these topics into a clean, organized JSON structure.""",
         ),
     ]
 )

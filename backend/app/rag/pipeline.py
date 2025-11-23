@@ -156,7 +156,9 @@ class RAGPipeline:
         self, pdf_path: str, page_start: int | None, page_end: int | None
     ) -> list:
         """Stage 1: Load PDF documents."""
-        return await load_pdf(pdf_path, page_start, page_end)
+        if page_start is not None and page_end is not None:
+            return load_pdf(pdf_path, page_range=(page_start, page_end))
+        return load_pdf(pdf_path)
 
     async def stage_2_chunk_documents(self, documents: list) -> list:
         """Stage 2: Chunk documents into smaller pieces."""

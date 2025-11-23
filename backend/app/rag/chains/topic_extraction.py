@@ -64,11 +64,13 @@ async def extract_topics_from_chunk(
     """
     chain = create_topic_extraction_chain(model_name, temperature)
 
+    # Build metadata string
+    metadata = f"Chunk {chunk_index + 1} of {total_chunks}"
+    
     result = await chain.ainvoke(
         {
             "chunk_text": chunk_text,
-            "chunk_index": chunk_index,
-            "total_chunks": total_chunks,
+            "metadata": metadata,
         }
     )
 

@@ -60,6 +60,16 @@ cp .env.example .env
 nano .env
 ```
 
+**Important:** Configure your **Google Gemini API key** for the RAG pipeline:
+
+```bash
+# Get your free API key from: https://makersuite.google.com/app/apikey
+# Then add it to your .env file:
+GEMINI_API_KEY=your-actual-api-key-here
+```
+
+📖 **See [GEMINI_API_SETUP.md](./GEMINI_API_SETUP.md) for detailed setup instructions.**
+
 ### 4. Initialize Database
 
 ```bash
@@ -167,12 +177,20 @@ backend/
 
 See `.env.example` for all available configuration options.
 
-Key variables:
-- `DATABASE_URL` - PostgreSQL connection string
-- `ENVIRONMENT` - development/staging/production
-- `DEBUG` - Enable debug mode
-- `CORS_ORIGINS` - Allowed CORS origins
-- `SECRET_KEY` - Application secret key
+### Key Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DATABASE_URL` | PostgreSQL connection string | Yes |
+| `GEMINI_API_KEY` | Google Gemini API key (for RAG pipeline) | **Yes** |
+| `ENVIRONMENT` | development/staging/production | Yes |
+| `DEBUG` | Enable debug mode | No |
+| `CORS_ORIGINS` | Allowed CORS origins | Yes |
+| `SECRET_KEY` | Application secret key | Yes |
+| `MINIO_ENDPOINT` | MinIO S3 endpoint | Yes |
+| `RABBITMQ_URL` | RabbitMQ connection string | Yes |
+
+📖 **For Gemini API setup, see [GEMINI_API_SETUP.md](./GEMINI_API_SETUP.md)**
 
 ## Docker Support
 
